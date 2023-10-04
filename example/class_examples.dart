@@ -1,3 +1,5 @@
+import 'package:reflect_buddy/reflect_buddy.dart';
+
 /// Easy-peasy. This type of class is
 /// the most simple to deserialize
 /// from JSON. All variable types are primitive
@@ -5,12 +7,20 @@ class SimpleUser {
   String? firstName;
   String? lastName;
   int? age;
+  
+  /// Notice that it can parse some weird stuff like this 
+  @JsonDateTimeDeserializingConverter(
+    dateFormat: 'yyyy---MM-dd'
+  )
+  DateTime? dateOfBirth;
 }
 
 const Map simpleUser = {
   'firstName': 'Konstantin',
   'lastName': 'Serov',
   'age': 36,
+  // 'dateOfBirth': '1987-01-01T21:50:45.241520',
+  'dateOfBirth': '1987---01-02',
 };
 
 /// A bit more complex but nothing much

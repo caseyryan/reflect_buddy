@@ -2,6 +2,15 @@ import 'dart:mirrors';
 
 import 'package:reflect_buddy/src/annotations/json_annotations.dart';
 
+extension JsonObjectExtension on Object {
+  Map<String, dynamic>? toJson() {
+    final classMirror = reflectType(runtimeType) as ClassMirror;
+    final instanceMirror = reflect(this);
+
+    return null;
+  }
+}
+
 extension TypeExtension on Type {
   dynamic newTypedInstance() {
     /// I used reflectType here instead of reflectClass to preserve all
@@ -22,9 +31,19 @@ extension TypeExtension on Type {
     return false;
   }
 
+  bool get isDateTime {
+    return this == DateTime;
+  }
+
   Object? fromJson(Object? data) {
     if (data == null) {
       return null;
+    } else if (this == data.runtimeType) {
+      return data;
+    } else if (isDateTime) {
+      if (data is String) {
+        return DateTime.tryParse(data);
+      }
     } else if (isPrimitive) {
       return data;
     } else if (data is List) {
@@ -73,13 +92,17 @@ extension TypeExtension on Type {
             final fieldType = variableMirror.type.hasReflectedType
                 ? variableMirror.type.reflectedType
                 : variableMirror.type.runtimeType;
-            var value = fieldType.fromJson(kv.value);
 
             final valueConverters =
-                variableMirror.getAnnotationsOfType<JsonValueConverter>();
+                variableMirror.getAnnotationsOfType<JsonValueConverter>().where(
+                      (e) => e.useCase == JsonValueConvertorUseCase.deserialization,
+                    );
+            var value = kv.value;
+
             for (final converter in valueConverters) {
               value = converter.convert(value);
             }
+            value = fieldType.fromJson(value);
 
             final valueValidators =
                 variableMirror.getAnnotationsOfType<JsonValueValidator>();
@@ -99,13 +122,14 @@ extension TypeExtension on Type {
         return mapInstance;
       }
     }
+
     return data;
   }
 }
 
 extension _VariableMirrorExtension on VariableMirror {
-  List<T> getAnnotationsOfType<T>() {
-    return metadata.whereType<T>().toList();
+  Iterable<T> getAnnotationsOfType<T>() {
+    return metadata.map((e) => e.reflectee).whereType<T>();
   }
 }
 

@@ -1,26 +1,45 @@
-
 import 'package:reflect_buddy/reflect_buddy.dart';
+import 'package:reflect_buddy/src/intl_local/lib/intl.dart';
 
-class JsonIgnore {
-  const JsonIgnore();
+class JsonInclude extends JsonKey {
+  JsonInclude()
+      : super(
+          isIgnored: false,
+          isIncluded: true,
+        );
 }
 
-/// If you need a field to have a specific name
-/// in Json, you can pass the name here
-class JsonName {
-  const JsonName(this.name);
-  final String name;
+class JsonIgnore extends JsonKey {
+  JsonIgnore()
+      : super(
+          isIgnored: true,
+          isIncluded: false,
+        );
+}
+
+/// [isIgnored] means this field will be ignored from a
+/// deserialized json even if it's public
+///
+/// [isIncluded] makes sense only for private fields if you
+/// want them to be included to a resulting JSON. By default
+/// private fields are ignored
+///
+/// [name] if you want the field name to be changed to some alternative
+/// one in a resulting JSON, just type this alternative name here
+class JsonKey {
+  const JsonKey({
+    this.isIgnored = false,
+    this.isIncluded = true,
+    this.name,
+  }) : assert(isIgnored != isIncluded);
+
+  final bool isIgnored;
+  final bool isIncluded;
+  final String? name;
 }
 
 class MongoType {
   const MongoType();
-}
-
-/// Use this annotation if you need
-/// to serialize / deserialize
-/// private fields
-class JsonInclude {
-  const JsonInclude();
 }
 
 /// If you need to validate a value before assigning it to
@@ -32,7 +51,7 @@ abstract class JsonValueValidator {
   const JsonValueValidator();
 
   /// [actualValue] the value to validate against
-  /// [fieldName] the name of the instance field if required to 
+  /// [fieldName] the name of the instance field if required to
   /// be able to display it in an exception if the validation fails
   void validate({
     covariant Object? actualValue,
@@ -128,16 +147,49 @@ class JsonStringValidator extends JsonValueValidator {
   }
 }
 
+enum JsonValueConvertorUseCase {
+  deserialization,
+  serialization,
+}
+
 /// Similar to [JsonValueValidator] but it must not
 /// throw any exceptions but convert a value instead
 /// For example: you get 101 from your json map, but an
 /// expected value must be in a range between 10 and 50.
 /// You simply clamp the actual value and return the max
 /// expected value in this case
+/// NOTICE: [JsonValueConverter]'s are called before
+/// a value is deserialized, so it can prepare an incoming value
+/// to be correctly deserialized
 abstract class JsonValueConverter {
-  const JsonValueConverter();
+  const JsonValueConverter({
+    this.useCase = JsonValueConvertorUseCase.serialization,
+  });
+
+  final JsonValueConvertorUseCase useCase;
 
   Object? convert(covariant Object? value);
+}
+
+/// This may help you automatically deserialize
+/// a DateTime object from an incoming String
+/// It only makes sense for deserializing
+class JsonDateTimeDeserializingConverter extends JsonValueConverter {
+  const JsonDateTimeDeserializingConverter({
+    required this.dateFormat,
+  }) : super(
+          useCase: JsonValueConvertorUseCase.deserialization,
+        );
+
+  final String dateFormat;
+
+  @override
+  DateTime? convert(covariant Object? value) {
+    if (value is String) {
+      return DateFormat(dateFormat).parse(value);
+    }
+    return null;
+  }
 }
 
 class JsonIntConverter extends JsonNumConverter {
@@ -171,11 +223,6 @@ class JsonNumConverter extends JsonValueConverter {
     }
     return value.clamp(minValue, maxValue);
   }
-}
-
-/// for mongodb
-class BsonIgnore {
-  const BsonIgnore();
 }
 
 abstract class KeyNameConverter {
