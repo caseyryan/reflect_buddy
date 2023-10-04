@@ -1,0 +1,90 @@
+/// Easy-peasy. This type of class is
+/// the most simple to deserialize
+/// from JSON. All variable types are primitive
+class SimpleUser {
+  String? firstName;
+  String? lastName;
+  int? age;
+}
+
+const Map simpleUser = {
+  'firstName': 'Konstantin',
+  'lastName': 'Serov',
+  'age': 36,
+};
+
+/// A bit more complex but nothing much
+class SimpleContainerWithCustomClass {
+  String? id;
+  SimpleUser? user;
+}
+
+const simpleContainerWithCustomClass = {
+  'id': 'userId123',
+  'user': {
+    'firstName': 'Konstantin',
+    'lastName': 'Serov',
+    'age': 36,
+  }
+};
+
+/// Even more complex but still not that much
+class ContainerWithCustomList {
+  String? id;
+  List<SimpleUser>? users;
+}
+
+const containerWithCustomList = {
+  'id': 'userId123',
+  'users': [
+    {
+      'firstName': 'Konstantin',
+      'lastName': 'Serov',
+      'age': 36,
+    },
+  ]
+};
+
+/// More complex than the list example because
+/// requires instantiation of a generic map
+class ContainerWithCustomMap {
+  String? id;
+  Map<String, SimpleUser>? users;
+}
+
+const containerWithCustomMap = {
+  'id': 'userId123',
+  'users': {
+    'first': {
+      'firstName': 'Konstantin',
+      'lastName': 'Serov',
+      'age': 36,
+    },
+    'second': {
+      'firstName': 'Karolina',
+      'lastName': 'Serova',
+      'age': 5,
+    },
+  }
+};
+
+/// One of the most challenging cases
+/// that requires instantiating classes with
+/// complex generic types
+class ContainerWithCustomGenerics {
+  String? id;
+  Map<String, List<SimpleUser>>? users;
+}
+
+const containerWithCustomGenerics = {
+  'id': 'userId123',
+  'users': {
+    'listOfUsers': [
+      {
+        'firstName': 'Konstantin',
+        'lastName': 'Serov',
+        'age': 36,
+      },
+    ],
+  }
+};
