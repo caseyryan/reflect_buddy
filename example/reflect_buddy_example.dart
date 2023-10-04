@@ -4,10 +4,12 @@ import 'class_examples.dart';
 
 void main() {
   // final result = (ContainerWithCustomGenerics).fromJson(containerWithCustomGenerics);
-  final result = (SimpleUser).fromJson(simpleUser);
+  // final result = (ContainerWithCustomList).fromJson(containerWithCustomList);
+  final result = (ContainerWithCustomMap).fromJson(containerWithCustomMap);
+  // final result = (SimpleUser).fromJson(simpleUser);
   // final result = (ContainerWithCustomMap).fromJson(containerWithCustomMap);
-  // print(result?.toJson());
-  print(result);
+  print(result?.toJson());
+  // print(result);
 }
 
 

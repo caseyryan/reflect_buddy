@@ -147,10 +147,6 @@ class JsonStringValidator extends JsonValueValidator {
   }
 }
 
-enum JsonValueConvertorUseCase {
-  deserialization,
-  serialization,
-}
 
 /// Similar to [JsonValueValidator] but it must not
 /// throw any exceptions but convert a value instead
@@ -162,31 +158,26 @@ enum JsonValueConvertorUseCase {
 /// a value is deserialized, so it can prepare an incoming value
 /// to be correctly deserialized
 abstract class JsonValueConverter {
-  const JsonValueConverter({
-    this.useCase = JsonValueConvertorUseCase.serialization,
-  });
+  const JsonValueConverter();
 
-  final JsonValueConvertorUseCase useCase;
 
   Object? convert(covariant Object? value);
 }
 
-/// This may help you automatically deserialize
-/// a DateTime object from an incoming String
-/// It only makes sense for deserializing
-class JsonDateTimeDeserializingConverter extends JsonValueConverter {
-  const JsonDateTimeDeserializingConverter({
+/// Serializes / Deserializes dates by a provided
+class JsonDateConverter extends JsonValueConverter {
+  const JsonDateConverter({
     required this.dateFormat,
-  }) : super(
-          useCase: JsonValueConvertorUseCase.deserialization,
-        );
+  });
 
   final String dateFormat;
 
   @override
-  DateTime? convert(covariant Object? value) {
+  Object? convert(covariant Object? value) {
     if (value is String) {
       return DateFormat(dateFormat).parse(value);
+    } else if (value is DateTime) {
+      return DateFormat(dateFormat).format(value);
     }
     return null;
   }

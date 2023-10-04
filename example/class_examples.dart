@@ -6,12 +6,10 @@ import 'package:reflect_buddy/reflect_buddy.dart';
 class SimpleUser {
   String? firstName;
   String? lastName;
-  late final int age;
-  
-  /// Notice that it can parse some weird stuff like this 
-  @JsonDateTimeDeserializingConverter(
-    dateFormat: 'yyyy---MM-dd'
-  )
+  int age = 0;
+
+  /// Notice that it can parse some weird stuff like this
+  @JsonDateConverter(dateFormat: 'yyyy_MM_dd')
   DateTime? dateOfBirth;
 }
 
@@ -19,8 +17,7 @@ const Map simpleUser = {
   'firstName': 'Konstantin',
   'lastName': 'Serov',
   'age': 36,
-  // 'dateOfBirth': '1987-01-01T21:50:45.241520',
-  'dateOfBirth': '1987---01-02',
+  'dateOfBirth': '1987_01_02',
 };
 
 /// A bit more complex but nothing much
@@ -51,6 +48,8 @@ const containerWithCustomList = {
       'firstName': 'Konstantin',
       'lastName': 'Serov',
       'age': 36,
+      // 'dateOfBirth': '1987-01-02T21:50:45.241520',
+      'dateOfBirth': '1987_01_02',
     },
   ]
 };

@@ -3,11 +3,71 @@ import 'dart:mirrors';
 import 'package:reflect_buddy/src/annotations/json_annotations.dart';
 
 extension JsonObjectExtension on Object {
-  Map<String, dynamic>? toJson() {
-    final classMirror = reflectType(runtimeType) as ClassMirror;
+  /// [includeNullValues] if true, the keys
+  /// whose values are null will still be included in a
+  /// resulting JSON with null values.
+  ///
+  /// If you want to skip the unset values just pass false
+  Object? toJson({
+    bool includeNullValues = false,
+  }) {
     final instanceMirror = reflect(this);
+    final Map<String, dynamic> json = {};
+    for (var kv in instanceMirror.type.declarations.entries) {
+      if (kv.value is VariableMirror) {
+        final variableMirror = kv.value as VariableMirror;
+        Object? rawValue = instanceMirror
+            .getField(
+              variableMirror.simpleName,
+            )
+            .reflectee;
+        final isJsonIncluded = variableMirror.isJsonIncluded;
+        if (variableMirror.isPrivate) {
+          if (!isJsonIncluded) {
+            continue;
+          }
+        } else {
+          if (variableMirror.isJsonIgnored) {
+            continue;
+          }
+        }
+        if (!includeNullValues && rawValue == null) {
+          if (isJsonIncluded == false) {
+            continue;
+          }
+        }
+        final valueConverters = variableMirror.getAnnotationsOfType<JsonValueConverter>();
+        for (final converter in valueConverters) {
+          rawValue = converter.convert(rawValue);
+        }
 
-    return null;
+        Object? value;
+        if (rawValue.runtimeType.isPrimitive) {
+          value = rawValue;
+        } else if (rawValue is List) {
+          value = rawValue
+              .map(
+                (Object? e) => e?.toJson(
+                  includeNullValues: includeNullValues,
+                ),
+              )
+              .toList();
+        } else if (rawValue is DateTime) {
+          return rawValue.toIso8601String();
+        } else if (rawValue is Map) {
+          value = rawValue.map(
+            (key, Object? value) => MapEntry(
+              key,
+              value?.toJson(
+                includeNullValues: includeNullValues,
+              ),
+            ),
+          );
+        }
+        json[variableMirror.name] = value;
+      }
+    }
+    return json;
   }
 }
 
@@ -85,7 +145,7 @@ extension TypeExtension on Type {
           final declarationMirror = reflectionClassMirror.declarations[Symbol(kv.key)];
           if (declarationMirror != null && declarationMirror is VariableMirror) {
             final VariableMirror variableMirror = declarationMirror;
-            if (variableMirror.isConst) {
+            if (variableMirror.isConst || variableMirror.isJsonIgnored) {
               continue;
             }
 
@@ -94,9 +154,7 @@ extension TypeExtension on Type {
                 : variableMirror.type.runtimeType;
 
             final valueConverters =
-                variableMirror.getAnnotationsOfType<JsonValueConverter>().where(
-                      (e) => e.useCase == JsonValueConvertorUseCase.deserialization,
-                    );
+                variableMirror.getAnnotationsOfType<JsonValueConverter>();
             var value = kv.value;
 
             for (final converter in valueConverters) {
@@ -130,6 +188,18 @@ extension TypeExtension on Type {
 extension _VariableMirrorExtension on VariableMirror {
   Iterable<T> getAnnotationsOfType<T>() {
     return metadata.map((e) => e.reflectee).whereType<T>();
+  }
+
+  String get name {
+    return simpleName.toName();
+  }
+
+  bool get isJsonIgnored {
+    return getAnnotationsOfType<JsonKey>().firstOrNull?.isIgnored == true;
+  }
+
+  bool get isJsonIncluded {
+    return getAnnotationsOfType<JsonKey>().firstOrNull?.isIncluded == true;
   }
 }
 
@@ -182,7 +252,15 @@ extension _ClassMirrorExtension on ClassMirror {
 }
 
 extension _SymbolExtension on Symbol {
-  static final RegExp _regExp = RegExp(r'(?<=Symbol\(")[a-zA-Z0-9_]+');
+  /// It's a hack.
+  /// The time measure showed that using RegExp for this purpose
+  /// (after the RegExp is compiled) takes 2000 - 2100 microseconds
+  /// or just about 2 milliseconds
+  /// I consider it to be an acceptable value for most cases
+  /// so using reflection would just make the code more complex here
+  static final RegExp _regExp = RegExp(
+    r'(?<=Symbol\(")[a-zA-Z0-9_]+',
+  );
 
   String toName() {
     final name = toString();
