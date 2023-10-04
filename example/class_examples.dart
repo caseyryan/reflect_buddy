@@ -6,7 +6,7 @@ import 'package:reflect_buddy/reflect_buddy.dart';
 class SimpleUser {
   String? firstName;
   String? lastName;
-  int? age;
+  late final int age;
   
   /// Notice that it can parse some weird stuff like this 
   @JsonDateTimeDeserializingConverter(
