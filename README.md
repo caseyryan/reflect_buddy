@@ -15,10 +15,20 @@
 - [List of Built-in annotations](#list-of-built-in-annotations)
 - [Writing custom annotations](#writing-custom-annotations)
 
+---
+If you want to support my development you can donate some `ETH / USDT`
+**0xaDed99fda2AA53B3aFC8bB2d27b14910dB9CEdA1**
+
+<img src="https://github.com/caseyryan/reflect_buddy/blob/master/trust.jpg?raw=true" width="220"/>
+
+[Donate via Trust Wallet](https://link.trustwallet.com/send?address=0xaDed99fda2AA53B3aFC8bB2d27b14910dB9CEdA1&asset=c60)
+
+---
+
 ## The concept
 This library is used to generate strongly typed objects based on JSON input without the necessity to prepare any models in advance. Literally in runtime.
 
-Most of the serializers in Dart are written using code builders. This is due to the fact that, most often, they are used with [Flutter](https://flutter.dev), the release assembly of which uses, so called, [Ahead of Time](https://en.wikipedia.org/wiki/Ahead-of-time_compilation) compilation. The [AOT](https://en.wikipedia.org/wiki/Ahead-of-time_compilation) compilation, makes it impossible to assemble types at runtime. All of the types there are known in advance.
+Most of the serializers in Dart are written using code builders. This is due to the fact that, most often, they are used with [Flutter](https://flutter.dev), the release assembly of which uses, so called, [Ahead of Time](https://en.wikipedia.org/wiki/Ahead-of-time_compilation) compilation. The [AOT](https://en.wikipedia.org/wiki/Ahead-of-time_compilation) compilation, makes it impossible to assemble types at runtime. All of the times there are known in advance.
 
 Unlike other serializers, **Reflect Buddy** uses [Just-in-Time](https://en.wikipedia.org/wiki/Just-in-time_compilation) compilation and does not require any pre-built models. Almost any regular class can be serialized/deserialized by calling just one method.
 
@@ -72,7 +82,7 @@ import 'package:reflect_buddy/reflect_buddy.dart';
 ```
 
 Get some JSON you want to deserialize to a typed object, e.g.
-```
+```json
 const containerWithUsers = {
   'id': 'userId123',
   'users': {
