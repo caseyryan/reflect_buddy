@@ -1,18 +1,24 @@
-import 'package:reflect_buddy/reflect_buddy.dart';
 
+
+
+enum Gender {
+  male,
+  female,
+}
 /// Easy-peasy. This type of class is
 /// the most simple to deserialize
 /// from JSON. All variable types are primitive
 class SimpleUser {
 
-  @CamelToSnake()
-  String? firstName;
-  String? lastName;
-  int age = 0;
+  // @CamelToSnake()
+  // String? firstName;
+  // String? lastName;
+  // int age = 0;
+  Gender? gender;
 
   /// Notice that it can parse some weird stuff like this
-  @JsonDateConverter(dateFormat: 'yyyy_MM_dd')
-  DateTime? dateOfBirth;
+  // @JsonDateConverter(dateFormat: 'yyyy_MM_dd')
+  // DateTime? dateOfBirth;
 }
 
 const Map simpleUser = {
@@ -20,6 +26,7 @@ const Map simpleUser = {
   'lastName': 'Serov',
   'age': 36,
   'dateOfBirth': '1987_01_02',
+  'gender': 'male',
 };
 
 /// A bit more complex but nothing much
