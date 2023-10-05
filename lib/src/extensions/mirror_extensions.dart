@@ -69,7 +69,7 @@ extension JsonObjectExtension on Object {
         } else if (rawValue is Enum) {
           value = rawValue.enumToString();
         } else if (rawValue is DateTime) {
-          return rawValue.toIso8601String();
+          value = rawValue.toIso8601String();
         } else if (rawValue is Map) {
           value = rawValue.map(
             (key, Object? value) => MapEntry(
@@ -79,8 +79,9 @@ extension JsonObjectExtension on Object {
               ),
             ),
           );
+        } else {
+          value = rawValue?.toJson();
         }
-
         final variableName = variableMirror.tryConvertVariableNameViaAnnotation(
           variableName: variableMirror.name,
         );
@@ -168,11 +169,28 @@ extension TypeExtension on Type {
       } else {
         final instanceMirror = reflect(mapInstance);
         for (var kv in data.entries) {
-          final declarationMirror = reflectionClassMirror.declarations[Symbol(kv.key)];
+          DeclarationMirror? declarationMirror;
+          for (var declaration in reflectionClassMirror.declarations.entries) {
+            /// this hack is needed to be able to access private fields
+            /// simply calling reflectionClassMirror.declarations[Symbol(kv.key)]; won't work 
+            /// in this case since private keys have unique namings based on their hash
+            /// toName() extension doesn't care for that, it uses a RegExp to parse 
+            /// the name
+            final simpleName = declaration.key.toName();
+            if (simpleName == kv.key) {
+              declarationMirror = declaration.value;
+              break;
+            }
+          }
           if (declarationMirror != null && declarationMirror is VariableMirror) {
             final VariableMirror variableMirror = declarationMirror;
             if (variableMirror.isConst || variableMirror.isJsonIgnored) {
               continue;
+            }
+            if (variableMirror.isPrivate) {
+              if (!variableMirror.isJsonIncluded) {
+                continue;
+              }
             }
             final variableClassMirror = variableMirror.type as ClassMirror;
             final fieldType = variableMirror.type.hasReflectedType

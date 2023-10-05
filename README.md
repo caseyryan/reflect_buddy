@@ -2,6 +2,7 @@
 
 ## A powerful live Dart JSON serializer / deserializer based on reflection ([dart:mirrors](https://api.dart.dev/stable/3.1.3/dart-mirrors/dart-mirrors-library.html))
 
+- [Small Intro](#small-intro)
 - [The concept](#the-concept)
     - [Background](#background)
     - [How it works](#how-it-works)
@@ -10,7 +11,7 @@
     - [Advantages](#advantages)
     - [Disadvantages](#disadvantages)
 - [Getting started](#getting-started)
-- [Serializing / Deserializing simple classes](#serializing-deserializing-simple-classes)
+- [Ignoring or Including fields](#ignoring-or-including-fields)
 - [Using annotations](#using-annotations)
 - [List of Built-in annotations](#list-of-built-in-annotations)
 - [Writing custom annotations](#writing-custom-annotations)
@@ -25,19 +26,23 @@ If you want to support my development you can donate some `ETH / USDT`
 
 ---
 
-## The concept
-This library is used to generate strictly typed objects based on JSON input without the necessity to prepare any models in advance. Literally in runtime.
+## Small Intro
 
-Most of the serializers in Dart are written using code builders. This is due to the fact that, most often, they are used with [Flutter](https://flutter.dev), the release assembly of which uses, so called, [Ahead of Time](https://en.wikipedia.org/wiki/Ahead-of-time_compilation) compilation. The [AOT](https://en.wikipedia.org/wiki/Ahead-of-time_compilation) compilation, makes it impossible to assemble types at runtime. All of the times there are known in advance.
+Having been involved in a C# development in the past, I always liked its ability to serialize and deserialize ordinary objects without any problems. There is no need to prepare any models, and field management can be done using attributes. To develop an easy-to-use backend, I really missed such functionality in Dart. So I decided to develop it. Meet **Reflect Buddy**
+
+## The concept
+This library is used to generate strictly typed objects based on JSON input without the need to prepare any models in advance. It works at runtime, literally on the fly.
+
+Most of the serializers in Dart are written using code builders. This is due to the fact that, most often, they are used with [Flutter](https://flutter.dev), the release assembly of which uses, so called, [Ahead of Time](https://en.wikipedia.org/wiki/Ahead-of-time_compilation) compilation. The [AOT](https://en.wikipedia.org/wiki/Ahead-of-time_compilation) compilation, makes it impossible to assemble types at runtime. All of the types there are known in advance.
 
 Unlike other serializers, **Reflect Buddy** uses [Just-in-Time](https://en.wikipedia.org/wiki/Just-in-time_compilation) compilation and does not require any pre-built models. Almost any regular class can be serialized/deserialized by calling just one method.
 
 ### Background
-The tool was originally developed as a component of my other project: [Dart Net Core API](https://github.com/caseyryan/dart_net_core_api). But, since it may be useful for other developments, I decided to put it in a separate package
+The tool was originally developed as a component of my other project: [Dart Net Core API](https://github.com/caseyryan/dart_net_core_api), also inspired (to some extent) by a C# library calles [Dotnet Core API](https://dotnet.microsoft.com/en-us/apps/aspnet/apis). But, since it may be useful for other developments, I decided to put it in a separate package
 
 ### How it works
 Imagine you have some class, for example a User, which contains the typical 
-values like first name, last name, age, id and other stuff like that. You want to send the instance of the user over a network. Of course you need to serialize it to some simple data like a JSON String.  
+values like first name, last name, age, id and other stuff like that. You want to send the instance of the user over a network. Of course you need to serialize it to some simple data like a JSON String.сщ  
 
 Usually you need to write toJson() method by hand or use some template for a code generator like this package [json_serializable](https://pub.dev/packages/json_serializable). It's a very good option if you use The [AOT](https://en.wikipedia.org/wiki/Ahead-of-time_compilation) compilation. But in [JIT](https://en.wikipedia.org/wiki/Just-in-time_compilation) you can dramatically simplify it by just calling ```toJson()``` on any instance. That's it. It is really that simple
 
@@ -82,7 +87,7 @@ import 'package:reflect_buddy/reflect_buddy.dart';
 ```
 
 Get some JSON you want to deserialize to a typed object, e.g.
-```json
+```
 const containerWithUsers = {
   'id': 'userId123',
   'users': {
@@ -114,7 +119,14 @@ class User {
   String? lastName;
   int age = 0;
   DateTime? dateOfBirth;
+  Gender? gender;
 }
+
+enum Gender {
+  male,
+  female,
+}
+
 
 ```
 
@@ -137,9 +149,40 @@ final containerInstance = containerWithUsers.toInstance<ContainerWithCustomUsers
 ```
 
 
-
-
 ## Serializing / Deserializing simple classes
+
+Any work with JSON sometimes requires hiding or, conversely, adding certain keys to the output.
+For example, in your User model, `_id` is a private field, but you want to return it to the frontend to be able to uniquely identify the object.
+By default, **Reflect Buddy** ignores private fields, but you can force them into json by adding the `@JsonInclude()` annotation to the field
+
+```dart
+class SimpleUserWithPrivateId {
+  @JsonInclude()
+  String? _id;
+  String? firstName;
+  String? lastName;
+  int age = 0;
+  Gender? gender;
+  DateTime? dateOfBirth;
+}
+
+/// This will also include a private `_id` field
+
+void _processSimpleUserWithPrivateId() {
+  final instance = fromJson<SimpleUserWithPrivateId>({
+    '_id': 'userId888',
+    'firstName': 'Konstantin',
+    'lastName': 'Serov',
+    'age': 36,
+    'gender': 'male',
+    'dateOfBirth': '1987-01-02T21:50:45.241520'
+  });
+  print(instance);
+  final json = instance?.toJson();
+  print(json);
+}
+
+```
 
 
 ## Using annotations

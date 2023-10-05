@@ -2,7 +2,7 @@ import 'package:reflect_buddy/reflect_buddy.dart';
 import 'package:reflect_buddy/src/intl_local/lib/intl.dart';
 
 class JsonInclude extends JsonKey {
-  JsonInclude()
+  const JsonInclude()
       : super(
           isIgnored: false,
           isIncluded: true,
@@ -10,7 +10,7 @@ class JsonInclude extends JsonKey {
 }
 
 class JsonIgnore extends JsonKey {
-  JsonIgnore()
+  const JsonIgnore()
       : super(
           isIgnored: true,
           isIncluded: false,
