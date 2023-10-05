@@ -13,8 +13,10 @@
 - [Getting started](#getting-started)
 - [Ignoring or Including fields](#ignoring-or-including-fields)
 - [Using annotations](#using-annotations)
-- [List of Built-in annotations](#list-of-built-in-annotations)
-- [Writing custom annotations](#writing-custom-annotations)
+- [Validators](#validators)
+- [Value converters](#validators)
+- [List of Annotations](#list-of-annotations)
+
 
 ---
 If you want to support my development you can donate some `ETH / USDT`
@@ -186,6 +188,121 @@ void _processSimpleUserWithPrivateId() {
 
 
 ## Using annotations
+
+Above there was already an example of using annotations. The example with `@JsonInclude()`. The library also has several more types of built-in annotations. One of them is @JsonIgnore(). You can add it to any field you want to exclude from the output. After which the field will no longer be included in JSON, even if it is filled in the model
+
+```dart
+class SimpleUser {
+
+  /// This will exclude firstName from a resulting JSON
+  @JsonIgnore()
+  String? firstName;
+  String? lastName;
+  int age = 0;
+  Gender? gender;
+  DateTime? dateOfBirth;
+}
+
+```
+
+## Validators
+
+There is also often a need to validate values before assigning them. You can use `JsonValueValidator` descendants for this purpose. This is the abstract class with only one method called `validate`. The method is called internally by **Reflect Buddy** and it accepts two arguments: the actual value that is about to be assigned to a field and the name of the field (for logging purposes). 
+You can extend `JsonValueValidator` class and write your own logic of a value validation for any fields ypu want. If the value is invalid, just throw an exception. You can see an example of such an implementation in `JsonNumValidator`
+
+```dart 
+class JsonNumValidator extends JsonValueValidator {
+  const JsonNumValidator({
+    required this.minValue,
+    required this.maxValue,
+    required this.canBeNull,
+  });
+
+  final num minValue;
+  final num maxValue;
+  final bool canBeNull;
+
+  @override
+  void validate({
+    num? actualValue,
+    required String fieldName,
+  }) {
+    if (!canBeNull) {
+      if (actualValue == null) {
+        throw Exception(
+          '"$actualValue" value is not allowed for [$fieldName]',
+        );
+      }
+    }
+    if (actualValue != null) {
+      if (actualValue < minValue || actualValue > maxValue) {
+        throw Exception(
+          '"$actualValue" is out of scope for "$fieldName" expected ($minValue - $maxValue)',
+        );
+      }
+    }
+  }
+}
+```
+
+## Value converters
+
+Another possible use case for annotations is data conversion.
+Imagine that you don't want to throw an exception if a value is out of bounds, but you also don't want to assign an invalid value. In this case, you can use a descendant of the `JsonValueConverter` class.
+
+Just like with `JsonValueValidator`, you can extend `JsonValueConverter` and write your own implementation for the `Object? convert(covariant Object? value);` method
+
+An example of such an implementation can be seen in this `JsonDateConverter`
+
+```dart
+class JsonDateConverter extends JsonValueConverter {
+  const JsonDateConverter({
+    required this.dateFormat,
+  });
+
+  final String dateFormat;
+
+  @override
+  Object? convert(covariant Object? value) {
+    if (value is String) {
+      return DateFormat(dateFormat).parse(value);
+    } else if (value is DateTime) {
+      return DateFormat(dateFormat).format(value);
+    }
+    return null;
+  }
+}
+
+```
+
+Or this one. It just clamps a numeric value
+
+```dart
+class JsonNumConverter extends JsonValueConverter {
+  const JsonNumConverter({
+    required this.minValue,
+    required this.maxValue,
+    required this.canBeNull,
+  });
+  final num minValue;
+  final num maxValue;
+  final bool canBeNull;
+
+  @override
+  num? convert(covariant num? value) {
+    if (value == null) {
+      if (canBeNull) {
+        return value;
+      }
+      return minValue;
+    }
+    return value.clamp(minValue, maxValue);
+  }
+}
+
+```
+
+
 
 
 ## List of Built-in annotations

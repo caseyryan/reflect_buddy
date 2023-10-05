@@ -1,9 +1,9 @@
 import 'package:reflect_buddy/reflect_buddy.dart';
 
 void main() {
-  // _processSimpleUser(); 
+  _processSimpleUser(); 
   _processSimpleUserWithPrivateId();
-  // _processUserWrapperWithCustomDate();
+  _processUserWrapperWithCustomDate();
   
 }
 
