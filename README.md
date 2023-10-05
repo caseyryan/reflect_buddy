@@ -5,7 +5,7 @@
 - [The concept](#the-concept)
     - [Background](#background)
     - [How it works](#how-it-works)
-    - [Limitations](#limitations-)
+    - [Limitations](#limitations)
     - [Supported built-in types](#supported-built-in-types)
     - [Advantages](#advantages)
     - [Disadvantages](#disadvantages)
