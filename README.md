@@ -72,7 +72,7 @@ import 'package:reflect_buddy/reflect_buddy.dart';
 ```
 
 Get some JSON you want to deserialize to a typed object, e.g.
-```json
+```
 const containerWithUsers = {
   'id': 'userId123',
   'users': {
