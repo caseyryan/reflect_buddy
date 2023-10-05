@@ -132,7 +132,7 @@ class DateSymbols {
       required this.FIRSTWEEKCUTOFFDAY,
       required this.DATETIMEFORMATS});
 
-  // TODO(alanknight): Replace this with use of a more general serialization
+  //  Replace this with use of a more general serialization
   // facility once one is available. Issue 4926.
   factory DateSymbols.deserializeFromMap(Map<dynamic, dynamic> map) {
     List<String> _getStringList(String name) => List<String>.from(map[name]);

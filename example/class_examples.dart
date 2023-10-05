@@ -4,6 +4,8 @@ import 'package:reflect_buddy/reflect_buddy.dart';
 /// the most simple to deserialize
 /// from JSON. All variable types are primitive
 class SimpleUser {
+
+  @CamelToSnake()
   String? firstName;
   String? lastName;
   int age = 0;

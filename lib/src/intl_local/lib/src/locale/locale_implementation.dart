@@ -167,13 +167,14 @@ class LocaleImplementation extends Locale {
   final Iterable<String> variants;
 
   /// Locale extensions, null if the locale has no extensions.
-  // TODO(hugovdm): Not yet supported: getters for extensions.
+  //  Not yet supported: getters for extensions.
   final LocaleExtensions? _extensions;
 
   /// Cache of the value returned by [toLanguageTag].
   String? _languageTag;
 
   /// Returns the canonical Unicode BCP47 Locale Identifier for this locale.
+  @override
   String toLanguageTag() {
     if (_languageTag == null) {
       final out = [languageCode];

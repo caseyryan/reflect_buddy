@@ -53,6 +53,7 @@ class UninitializedLocaleData<F> implements MessageLookup {
   String get _uninitializedMessages =>
       (_badMessages.toSet().toList()..sort()).join('\n    ');
 
+  @override
   String? lookupMessage(String? messageText, String? locale, String? name,
       List<Object>? args, String? meaning,
       {MessageIfAbsent? ifAbsent}) {
@@ -134,7 +135,7 @@ String canonicalizedLocale(String? aLocale) {
 // Locales longer than 6 might be malformed, but also do occur. Do as
 // little as possible to them, but make the '-' be an '_' if it's there.
 // We treat C as a special case, and assume it wants en_ISO for formatting.
-// TODO(alanknight): en_ISO is probably not quite right for the C/Posix
+//  en_ISO is probably not quite right for the C/Posix
 // locale for formatting. Consider adding C to the formats database.
   if (aLocale == null) return global_state.getCurrentLocale();
   if (aLocale == 'C') return 'en_ISO';
@@ -148,7 +149,7 @@ String canonicalizedLocale(String? aLocale) {
 
 String? verifiedLocale(String? newLocale, bool Function(String) localeExists,
     String? Function(String)? onFailure) {
-// TODO(alanknight): Previously we kept a single verified locale on the Intl
+//  Previously we kept a single verified locale on the Intl
 // object, but with different verification for different uses, that's more
 // difficult. As a result, we call this more often. Consider keeping
 // verified locales for each purpose if it turns out to be a performance

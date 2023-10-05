@@ -66,10 +66,11 @@ class _MicroMoney implements MicroMoney {
     return _MicroMoney(_micros.remainder(other * _multiplier));
   }
 
-  double toDouble() => _micros.toDouble() / _multiplier;
+  double uble() => _micros.uble() / _multiplier;
 
   int toInt() => _integerPart.toInt();
 
+  @override
   String toString() {
     var beforeDecimal = '$_integerPart';
     var decimalPart = '';

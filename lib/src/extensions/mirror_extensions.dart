@@ -2,7 +2,18 @@ import 'dart:mirrors';
 
 import 'package:reflect_buddy/src/annotations/json_annotations.dart';
 
+Object? fromJson<T>(Object? data) {
+  return T.fromJson(data);
+}
+
 extension JsonObjectExtension on Object {
+
+
+  Object? toInstance<T>() {
+    return T.fromJson(this);
+  }
+
+
   /// [includeNullValues] if true, the keys
   /// whose values are null will still be included in a
   /// resulting JSON with null values.
@@ -64,7 +75,12 @@ extension JsonObjectExtension on Object {
             ),
           );
         }
-        json[variableMirror.name] = value;
+
+        final variableName = variableMirror.tryConvertVariableNameViaAnnotation(
+          variableName: variableMirror.name,
+        );
+
+        json[variableName] = value;
       }
     }
     return json;
@@ -164,11 +180,18 @@ extension TypeExtension on Type {
 
             final valueValidators =
                 variableMirror.getAnnotationsOfType<JsonValueValidator>();
+            final variableName = variableMirror.simpleName.toName();
             for (final validator in valueValidators) {
               validator.validate(
-                fieldName: variableMirror.simpleName.toName(),
+                fieldName: variableName,
                 actualValue: value,
               );
+            }
+            final keyNameConvertor = variableMirror.tryGetKeyNameConverter(
+              variableName: variableName,
+            );
+            if (keyNameConvertor != null) {
+              print(keyNameConvertor);
             }
 
             instanceMirror.setField(
@@ -188,6 +211,28 @@ extension TypeExtension on Type {
 extension _VariableMirrorExtension on VariableMirror {
   Iterable<T> getAnnotationsOfType<T>() {
     return metadata.map((e) => e.reflectee).whereType<T>();
+  }
+
+  String tryConvertVariableNameViaAnnotation({
+    required String variableName,
+  }) {
+    final converter = tryGetKeyNameConverter(variableName: variableName);
+    variableName = converter?.convert(variableName) ?? variableName;
+    return variableName;
+  }
+
+  JsonKeyNameConverter? tryGetKeyNameConverter({
+    required String variableName,
+  }) {
+    final keyNameConvertors = getAnnotationsOfType<JsonKeyNameConverter>();
+    final numConverters = keyNameConvertors.length;
+    if (numConverters > 0) {
+      if (numConverters > 1) {
+        throw 'You can only apply one annotation of type $JsonKeyNameConverter to a field. $variableName has $numConverters';
+      }
+      return keyNameConvertors.first;
+    }
+    return null;
   }
 
   String get name {

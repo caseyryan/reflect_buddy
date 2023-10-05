@@ -20,7 +20,7 @@ import 'intl_helpers.dart';
 /// depending on what implementation we are using. By default, it is initialized
 /// to an instance of UninitializedLocaleData, so any attempt to use it will
 /// result in an informative error message.
-// TODO(alanknight): Have a valid type for this. Currently it can be an
+//  Have a valid type for this. Currently it can be an
 // UninitializedLocaleData, Map, or LazyLocaleData.
 dynamic get dateTimeSymbols => _dateTimeSymbols;
 
@@ -50,7 +50,7 @@ String? lastDateSymbolLocale;
 /// depending on what implementation we are using. By default, it is initialized
 /// to an instance of UninitializedLocaleData, so any attempt to use it will
 /// result in an informative error message.
-// TODO(alanknight): Have a valid type for this. Currently it can be an
+//  Have a valid type for this. Currently it can be an
 // UninitializedLocaleData, Map, or LazyLocaleData.
 dynamic dateTimePatterns = UninitializedLocaleData(
     'initializeDateFormatting(<locale>)', en_USPatterns);

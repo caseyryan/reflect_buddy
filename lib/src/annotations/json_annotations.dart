@@ -216,8 +216,8 @@ class JsonNumConverter extends JsonValueConverter {
   }
 }
 
-abstract class KeyNameConverter {
-  const KeyNameConverter();
+abstract class JsonKeyNameConverter {
+  const JsonKeyNameConverter();
   String convert(String value);
 }
 
@@ -225,8 +225,8 @@ abstract class KeyNameConverter {
 /// will convert every field / variable name in a way that the first
 /// letter will be uppercase
 /// e.g. firstName will be converted to FirstName
-class FirstLetterToUppercaseConverter extends KeyNameConverter {
-  const FirstLetterToUppercaseConverter();
+class FirstToUpper extends JsonKeyNameConverter {
+  const FirstToUpper();
 
   @override
   String convert(String value) {
@@ -238,8 +238,8 @@ class FirstLetterToUppercaseConverter extends KeyNameConverter {
 /// as well as on public variables and getters
 /// e.g. a name like userFirstName will be converted to
 /// user_first_name
-class CamelToSnakeConverter extends KeyNameConverter {
-  const CamelToSnakeConverter();
+class CamelToSnake extends JsonKeyNameConverter {
+  const CamelToSnake();
 
   @override
   String convert(String value) {
@@ -247,8 +247,8 @@ class CamelToSnakeConverter extends KeyNameConverter {
   }
 }
 
-class SnakeToCamelConverter extends KeyNameConverter {
-  const SnakeToCamelConverter();
+class SnakeToCamel extends JsonKeyNameConverter {
+  const SnakeToCamel();
 
   @override
   String convert(String value) {

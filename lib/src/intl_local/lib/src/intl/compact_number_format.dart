@@ -189,7 +189,7 @@ class _CompactNumberFormat extends NumberFormat {
       bool lookupSimpleCurrencySymbol = false,
       bool isForCurrency = false}) {
     // Initialization copied from `NumberFormat` constructor.
-    // TODO(davidmorgan): deduplicate.
+    // (davidmorgan): deduplicate.
     locale = helpers.verifiedLocale(locale, NumberFormat.localeExists, null)!;
     var symbols = numberFormatSymbols[locale] as NumberSymbols;
     var localeZero = symbols.ZERO_DIGIT.codeUnitAt(0);
@@ -220,7 +220,7 @@ class _CompactNumberFormat extends NumberFormat {
       case _CompactFormatType.COMPACT_DECIMAL_SHORT_PATTERN:
         patterns = compactSymbols.COMPACT_DECIMAL_SHORT_PATTERN;
         break;
-      // TODO(alanknight): Long formats may have different forms for different
+      //  Long formats may have different forms for different
       // plural cases (e.g. million/millions).
       case _CompactFormatType.COMPACT_DECIMAL_LONG_PATTERN:
         patterns = compactSymbols.COMPACT_DECIMAL_LONG_PATTERN ??
@@ -372,7 +372,7 @@ class _CompactNumberFormat extends NumberFormat {
     if (additionalDigits > 0) {
       var divisor = pow(10, additionalDigits);
       // If we have an Int64, value speed over precision and make it double.
-      var rounded = (number.toDouble() / divisor).round() * divisor;
+      var rounded = (number.uble() / divisor).round() * divisor;
       digitLength = NumberFormat.numberOfIntegerDigits(rounded);
     }
     for (var style in _styles) {

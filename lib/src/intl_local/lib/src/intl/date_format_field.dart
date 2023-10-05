@@ -394,7 +394,7 @@ class _DateFormatPatternField extends _DateFormatField {
   }
 
   String formatYear(DateTime date) {
-    // TODO(alanknight): Proper handling of years <= 0
+    //  Proper handling of years <= 0
     var year = date.year;
     if (year < 0) {
       year = -year;
@@ -638,7 +638,7 @@ class _DateFormatPatternField extends _DateFormatField {
   }
 
   String formatTimeZoneId(DateTime date) {
-    // TODO(alanknight): implement time zone support
+    //  implement time zone support
     throw UnimplementedError();
   }
 

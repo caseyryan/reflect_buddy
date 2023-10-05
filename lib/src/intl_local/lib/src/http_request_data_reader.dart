@@ -9,6 +9,7 @@ library http_request_data_reader;
 
 import 'dart:async';
 import 'dart:html';
+
 import 'intl_helpers.dart';
 
 class HttpRequestDataReader implements LocaleDataReader {
@@ -16,6 +17,7 @@ class HttpRequestDataReader implements LocaleDataReader {
   String url;
   HttpRequestDataReader(this.url);
 
+  @override
   Future<String> read(String locale) {
     var request = HttpRequest();
     request.timeout = 5000;

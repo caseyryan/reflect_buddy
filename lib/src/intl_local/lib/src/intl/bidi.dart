@@ -18,7 +18,7 @@ import 'text_direction.dart';
 /// This provides utility methods for working with bidirectional text. All
 /// of the methods are static, and are organized into a class primarily to
 /// group them together for documentation and discoverability.
-// TODO(alanknight): Consider a better way of organizing these.
+//  Consider a better way of organizing these.
 class Bidi {
   /// Unicode "Left-To-Right Embedding" (LRE) character.
   static const LRE = '\u202A';
@@ -226,7 +226,7 @@ class Bidi {
   /// Given a [str] and the [regexp] to match with, optionally supply a string
   /// to be inserted [before] the match and/or [after]. For example,
   /// `_guardBracketHelper('firetruck', new RegExp('truck'), 'hydrant', '!')`
-  /// would return 'firehydrant!'.  // TODO(efortuna): Get rid of this once this
+  /// would return 'firehydrant!'.  // (efortuna): Get rid of this once this
   /// is implemented in Dart.  // See Issue 2979.
   static String _guardBracketHelper(String str, RegExp regexp,
       [String? before, String? after]) {

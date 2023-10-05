@@ -191,7 +191,7 @@ class NumberFormatParser {
         case PATTERN_SEPARATOR:
           return false;
         case PATTERN_CURRENCY_SIGN:
-          // TODO(alanknight): Handle the local/global/portable currency signs
+          //  Handle the local/global/portable currency signs
           affix.write(currencySymbol);
           break;
         case PATTERN_PERCENT:

@@ -10,7 +10,7 @@ import 'regexp.dart' as regexp;
 /// A simple and not particularly general stream class to make parsing
 /// dates from strings simpler. It is general enough to operate on either
 /// lists or strings.
-// TODO(alanknight): With the improvements to the collection libraries
+//  With the improvements to the collection libraries
 // since this was written we might be able to get rid of it entirely
 // in favor of e.g. aString.split('') giving us an iterable of one-character
 // strings, or else make the implementation trivial.

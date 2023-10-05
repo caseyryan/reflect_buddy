@@ -134,7 +134,7 @@ class NumberParser {
     bool checkPrefix(String prefix) =>
         prefix.isNotEmpty && input.startsWith(prefix);
 
-    // TODO(alanknight): There's a faint possibility of a bug here where
+    //  There's a faint possibility of a bug here where
     // a positive prefix is followed by a negative prefix that's also a valid
     // part of the number, but that seems very unlikely.
     if (checkPrefix(_positivePrefix)) gotPositive = true;

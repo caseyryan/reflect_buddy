@@ -780,7 +780,7 @@ void _checkAndThrow(bool condition, String message) {
 }
 
 // Dart has no support for ordinals
-// TODO(b/142132665): add ordial rules to intl, then fix this
+// (b/142132665): add ordial rules to intl, then fix this
 class _OrdinalRules {
   static String select(num n, String locale) {
     return _PluralRules.select(n, locale);

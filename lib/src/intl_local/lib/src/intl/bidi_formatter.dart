@@ -149,7 +149,7 @@ class BidiFormatter {
   /// TextDirection.UNKNOWN return value indicates completely neutral input.
   /// [isHtml] is true if [text] HTML or HTML-escaped.
   TextDirection estimateDirection(String text, {bool isHtml = false}) {
-    return Bidi.estimateDirectionOfText(text, isHtml: isHtml); //TODO~!!!
+    return Bidi.estimateDirectionOfText(text, isHtml: isHtml); //~!!!
   }
 
   /// Returns a unicode BiDi mark matching the surrounding context's [direction]
