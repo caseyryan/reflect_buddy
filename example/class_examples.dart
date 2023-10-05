@@ -1,6 +1,8 @@
 
 
 
+import 'package:reflect_buddy/reflect_buddy.dart';
+
 enum Gender {
   male,
   female,
@@ -10,10 +12,10 @@ enum Gender {
 /// from JSON. All variable types are primitive
 class SimpleUser {
 
-  // @CamelToSnake()
-  // String? firstName;
-  // String? lastName;
-  // int age = 0;
+  @CamelToSnake()
+  String? firstName;
+  String? lastName;
+  int age = 0;
   Gender? gender;
 
   /// Notice that it can parse some weird stuff like this

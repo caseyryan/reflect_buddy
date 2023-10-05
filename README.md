@@ -26,7 +26,7 @@ If you want to support my development you can donate some `ETH / USDT`
 ---
 
 ## The concept
-This library is used to generate strongly typed objects based on JSON input without the necessity to prepare any models in advance. Literally in runtime.
+This library is used to generate strictly typed objects based on JSON input without the necessity to prepare any models in advance. Literally in runtime.
 
 Most of the serializers in Dart are written using code builders. This is due to the fact that, most often, they are used with [Flutter](https://flutter.dev), the release assembly of which uses, so called, [Ahead of Time](https://en.wikipedia.org/wiki/Ahead-of-time_compilation) compilation. The [AOT](https://en.wikipedia.org/wiki/Ahead-of-time_compilation) compilation, makes it impossible to assemble types at runtime. All of the times there are known in advance.
 
@@ -39,7 +39,7 @@ The tool was originally developed as a component of my other project: [Dart Net 
 Imagine you have some class, for example a User, which contains the typical 
 values like first name, last name, age, id and other stuff like that. You want to send the instance of the user over a network. Of course you need to serialize it to some simple data like a JSON String.  
 
-Usually you need to write toJson() method by hand or use some template for a code generator like this great package [json_serializable](https://pub.dev/packages/json_serializable). It's a very good option if you use The [AOT](https://en.wikipedia.org/wiki/Ahead-of-time_compilation) compilation. But in [JIT](https://en.wikipedia.org/wiki/Just-in-time_compilation) you can dramatically simplify it by just calling ```toJson()``` on any instance. That't it. It is really that simple
+Usually you need to write toJson() method by hand or use some template for a code generator like this package [json_serializable](https://pub.dev/packages/json_serializable). It's a very good option if you use The [AOT](https://en.wikipedia.org/wiki/Ahead-of-time_compilation) compilation. But in [JIT](https://en.wikipedia.org/wiki/Just-in-time_compilation) you can dramatically simplify it by just calling ```toJson()``` on any instance. That's it. It is really that simple
 
 A class like this is completely ready to work with **Reflect Buddy**. As you can see there is absolutely nothing special here. It's just a regular [Dart](https://dart.dev/language/classes) class. 
 
@@ -72,7 +72,7 @@ Below is the list of built-in types it can work with by default (including gener
 * [int](https://api.dart.dev/stable/3.1.3/dart-core/int-class.html)
 * [num](https://api.dart.dev/stable/3.1.3/dart-core/num-class.html)
 * [bool](https://api.dart.dev/stable/3.1.3/dart-core/bool-class.html)
-* ~~[Enum](https://api.dart.dev/stable/3.1.3/dart-core/Enum-class.html)~~ not supported yet but will be available soon
+* [Enum](https://api.dart.dev/stable/3.1.3/dart-core/Enum-class.html)
 
 ## Getting started
 

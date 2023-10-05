@@ -6,13 +6,16 @@ Object? fromJson<T>(Object? data) {
   return T.fromJson(data);
 }
 
+extension JsonEnumExtension on Enum {
+  String? enumToString() {
+    return toString().split('.')[1];
+  }
+}
+
 extension JsonObjectExtension on Object {
-
-
   Object? toInstance<T>() {
     return T.fromJson(this);
   }
-
 
   /// [includeNullValues] if true, the keys
   /// whose values are null will still be included in a
@@ -63,6 +66,8 @@ extension JsonObjectExtension on Object {
                 ),
               )
               .toList();
+        } else if (rawValue is Enum) {
+          value = rawValue.enumToString();
         } else if (rawValue is DateTime) {
           return rawValue.toIso8601String();
         } else if (rawValue is Map) {
@@ -88,11 +93,16 @@ extension JsonObjectExtension on Object {
 }
 
 extension TypeExtension on Type {
-  dynamic newTypedInstance() {
+  Object? newTypedInstance() {
     /// I used reflectType here instead of reflectClass to preserve all
     /// the generic arguments which might be important
     final classMirror = reflectType(this) as ClassMirror;
     return classMirror._instantiateUsingDefaultConstructor();
+  }
+
+  Object? newEnumInstance(Object? value) {
+    final classMirror = reflectType(this) as ClassMirror;
+    return classMirror._instantiateEnum(value);
   }
 
   bool get isPrimitive {
@@ -164,10 +174,11 @@ extension TypeExtension on Type {
             if (variableMirror.isConst || variableMirror.isJsonIgnored) {
               continue;
             }
-
+            final variableClassMirror = variableMirror.type as ClassMirror;
             final fieldType = variableMirror.type.hasReflectedType
-                ? variableMirror.type.reflectedType
-                : variableMirror.type.runtimeType;
+                ? variableClassMirror.reflectedType
+                : variableClassMirror.runtimeType;
+            final isEnum = variableClassMirror.isEnum;
 
             final valueConverters =
                 variableMirror.getAnnotationsOfType<JsonValueConverter>();
@@ -176,6 +187,10 @@ extension TypeExtension on Type {
             for (final converter in valueConverters) {
               value = converter.convert(value);
             }
+            if (isEnum && value is! Enum) {
+              value = fieldType.newEnumInstance(value);
+            }
+
             value = fieldType.fromJson(value);
 
             final valueValidators =
@@ -187,12 +202,12 @@ extension TypeExtension on Type {
                 actualValue: value,
               );
             }
-            final keyNameConvertor = variableMirror.tryGetKeyNameConverter(
-              variableName: variableName,
-            );
-            if (keyNameConvertor != null) {
-              print(keyNameConvertor);
-            }
+            // final keyNameConvertor = variableMirror.tryGetKeyNameConverter(
+            //   variableName: variableName,
+            // );
+            // if (keyNameConvertor != null) {
+            //   print(keyNameConvertor);
+            // }
 
             instanceMirror.setField(
               variableMirror.simpleName,
@@ -276,6 +291,16 @@ extension _ClassMirrorExtension on ClassMirror {
       return [{}];
     }
     return [];
+  }
+
+  dynamic _instantiateEnum(Object? value) {
+    if (value == null || value is! String) {
+      return null;
+    }
+    final valueSymbol = Symbol(value);
+    if (declarations.keys.any((e) => e == valueSymbol)) {
+      return getField(valueSymbol).reflectee;
+    }
   }
 
   dynamic _instantiateUsingDefaultConstructor() {
