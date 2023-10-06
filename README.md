@@ -13,10 +13,10 @@
     - [Advantages](#advantages)
     - [Disadvantages](#disadvantages)
 - [Getting started](#getting-started)
-- [Ignoring or Including fields](#ignoring-or-including-fields)
+- [Serializing / Deserializing simple classes](#serializing-deserializing-simple-classes)
 - [Using annotations](#using-annotations)
 - [Validators](#validators)
-- [Value converters](#validators)
+- [Value converters](#value-converters)
 - [Key name converters](#key-name-converters)
 - [List of Built-In Annotations](#list-of-built-in-annotations)
 - [Writing custom annotations](#writing-custom-annotations)
@@ -397,7 +397,7 @@ In this case, `JsonKey` will have the highest priority over any name converters
 - `@JsonInclude()` - a field level annotation which forces the key/value to be included to a resulting JSON
 event if the field is private
 - `@JsonIgnore()` - the reverse of `JsonInclude`. It completely excludes the field from being serialized
-- `@JsonKey()` - base class for 
+- `@JsonKey()` - **base class** for a field rule
 
 ### Validators
 - `@JsonValueValidator()` - **base class** can be extended for any type validation
