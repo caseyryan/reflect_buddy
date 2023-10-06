@@ -38,10 +38,6 @@ class JsonKey {
   final String? name;
 }
 
-class MongoType {
-  const MongoType();
-}
-
 /// If you need to validate a value before assigning it to
 /// a field, you can annotate the field with a descendant of
 /// this class. You can use many of these validators on a field
@@ -147,7 +143,6 @@ class JsonStringValidator extends JsonValueValidator {
   }
 }
 
-
 /// Similar to [JsonValueValidator] but it must not
 /// throw any exceptions but convert a value instead
 /// For example: you get 101 from your json map, but an
@@ -159,7 +154,6 @@ class JsonStringValidator extends JsonValueValidator {
 /// to be correctly deserialized
 abstract class JsonValueConverter {
   const JsonValueConverter();
-
 
   Object? convert(covariant Object? value);
 }

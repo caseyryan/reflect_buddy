@@ -15,6 +15,7 @@
 - [Using annotations](#using-annotations)
 - [Validators](#validators)
 - [Value converters](#validators)
+- [Key name converters](#key-name-converters)
 - [List of Built-In Annotations](#list-of-built-in-annotations)
 
 
@@ -30,7 +31,7 @@ If you want to support my development you can donate some `ETH / USDT`
 
 ## Small Intro
 
-Having been involved in a C# development in the past, I always liked its ability to serialize and deserialize ordinary objects without any problems. There is no need to prepare any models, and field management can be done using attributes. To develop an easy-to-use backend, I really missed such functionality in Dart. So I decided to develop it. Meet **Reflect Buddy**
+Having been involved in a C# development in the past, I always liked its ability to serialize and deserialize ordinary objects without any problems. There is no need to prepare any models, and field management can be done using attributes. To write an easy-to-use backend solution, I really missed such a functionality in Dart. So I decided to develop it myself. Meet **Reflect Buddy**:
 
 ## The concept
 This library is used to generate strictly typed objects based on JSON input without the need to prepare any models in advance. It works at runtime, literally on the fly.
@@ -276,6 +277,13 @@ class JsonDateConverter extends JsonValueConverter {
 }
 
 ```
+In `JsonDateConverter` you can pass any date format and it will be used to parse a date from or to a String. For example:
+```dart
+@JsonDateConverter(dateFormat: 'yyyy-MM-dd')
+```
+
+This will allow you to have custom date representation in your JSON
+
 
 Or this one. It just clamps a numeric value
 
@@ -304,10 +312,106 @@ class JsonNumConverter extends JsonValueConverter {
 
 ```
 
+## Key name converters
 
+There are certain scenarios in which you need to change the key names in the output JSON. For example, in the database they are stored as a `camelCase`, but on the front end a `snake_case` (or something else) is expected.
+**Reflect Buddy** has special annotations for this case too. They inherit from `JsonKeyNameConverter`. Here is an example of using several different converters. 
+
+```dart 
+
+class SimpleUserKeyConversion {
+
+  @CamelToSnake()
+  String? firstName;
+  @CamelToSnake()
+  String? lastName;
+
+  @FirstToUpper()
+  int age = 0;
+  @FirstToUpper()
+  Gender? gender;
+  @FirstToUpper()
+  DateTime? dateOfBirth;
+}
+
+```
+
+Calling `toJson()` on an instance of this class, will lead to a result like this:
+
+```
+{first_name: Konstantin, last_name: Serov, Age: 36, Gender: male, DateOfBirth: 1987-01-02T21:50:45.241520}
+```
+
+Of course, if you use the same key naming strategy for all fields, then it would be stupid to write an annotation for each field separately. In this case you have two options:
+
+1. You can pass a descendant of a `JsonKeyNameConverter` as a parameter to the 
+```dart 
+  Object? toJson({
+    bool includeNullValues = false,
+    JsonKeyNameConverter? keyNameConverter,
+  }) {
+    ...  
+  }
+
+``` 
+method
+
+2. You can annotate the whole class like this:
+```dart
+@CamelToSnake()
+class SimpleUserClassKeyNames {
+
+  String? firstName;
+  String? lastName;
+  int age = 0;
+  Gender? gender;
+  DateTime? dateOfBirth;
+}
+
+```
+
+But keep in mind, that field annotations have a higher priority over all 
+other options. And they will override whatever you use on a class or pass to the `toJson()` method arguments. And the argument will override the class level annotation.
+
+So the hierarchy is like this:
+* Field level annotation
+  * argument (of `toJson()`)
+    * Class level annotation
+ 
+**Notice** that another way to change the key name is to add a
+```dart
+@JsonKey(name: 'someNewName')
+```
+annotation to a field
+
+In this case, `JsonKey` will have the highest priority over any name converters
 
 
 ## List of Built-In Annotations
 
+- `@JsonInclude()` - a field level annotation which forces the key/value to be included to a resulting JSON
+event if the field is private
+- `@JsonIgnore()` - the reverse of `JsonInclude`. It completely excludes the field from being serialized
+- `@JsonKey()` - base class for 
+- `@JsonValueValidator()` - **base class** can be extended for any type validation
+- `@JsonIntValidator()` - this annotation allows to to check if an int value is within the allowed rand. It will throw an exception if the value is beyond that
+- `@JsonDoubleValidator()` - the same as int validator but for double
+- `@JsonNumValidator()` - the same as int validator but for double
+- `@JsonStringValidator()` - can validate a string against a regular expression pattern
+- `@JsonValueConverter()` - **base class**: can be extended for any type conversion
+- `@JsonDateConverter()` - allows you to provide a default date format for a DateTime, e.g. `yyyy-MM-dd` or some other
+- `@JsonIntConverter()` - this one allows to clamp an `int` value between min and max values or to give it a default value if the actual value is null
+- `@JsonNumConverter()` - the same as `int` converter but for `num`
+- `@JsonKeyNameConverter()` - **base class**: can be used to write custom converters
+- `@CamelToSnake()` - converts a field name to `snake_case_style` 
+- `@SnakeToCamel()`- converts a field name to `camelCaseStyle` 
+- `@FirstToUpper()` - converts a first letter of a field name to upper case
+
 
 ## Writing custom annotations
+
+Some of the annotations above are marked as **base class** you can extend them and write a custom logic. 
+
+I will also add some types here later
+
+

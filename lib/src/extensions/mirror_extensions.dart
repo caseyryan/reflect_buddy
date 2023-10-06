@@ -1,5 +1,6 @@
 import 'dart:mirrors';
 
+import 'package:collection/collection.dart';
 import 'package:reflect_buddy/src/annotations/json_annotations.dart';
 
 Object? fromJson<T>(Object? data) {
@@ -22,11 +23,23 @@ extension JsonObjectExtension on Object {
   /// resulting JSON with null values.
   ///
   /// If you want to skip the unset values just pass false
+  /// [keyNameConverter] if you need to apply some conversion
+  /// on the resulting JSON key names, pass a converter here.
+  /// There is also there types of convertors available
+  /// []
   Object? toJson({
     bool includeNullValues = false,
+    JsonKeyNameConverter? keyNameConverter,
   }) {
     final instanceMirror = reflect(this);
     final Map<String, dynamic> json = {};
+    JsonKeyNameConverter? classLevelKeyNameConverter =
+        instanceMirror.type.tryGetKeyNameConverter();
+    if (classLevelKeyNameConverter != null && keyNameConverter != null) {
+      /// if you pass a keyNameConverter, it will override the existing annotation of the same type
+      classLevelKeyNameConverter = null;
+    }
+    keyNameConverter ??= classLevelKeyNameConverter;
     for (var kv in instanceMirror.type.declarations.entries) {
       if (kv.value is VariableMirror) {
         final variableMirror = kv.value as VariableMirror;
@@ -50,7 +63,9 @@ extension JsonObjectExtension on Object {
             continue;
           }
         }
-        final valueConverters = variableMirror.getAnnotationsOfType<JsonValueConverter>();
+        final alternativeName = variableMirror.alternativeName;
+        final valueConverters =
+            variableMirror.getAnnotationsOfType<JsonValueConverter>();
         for (final converter in valueConverters) {
           rawValue = converter.convert(rawValue);
         }
@@ -82,9 +97,11 @@ extension JsonObjectExtension on Object {
         } else {
           value = rawValue?.toJson();
         }
-        final variableName = variableMirror.tryConvertVariableNameViaAnnotation(
-          variableName: variableMirror.name,
-        );
+        final variableName = alternativeName ??
+            variableMirror.tryConvertVariableNameViaAnnotation(
+              variableName: variableMirror.name,
+              keyNameConverter: keyNameConverter,
+            );
 
         json[variableName] = value;
       }
@@ -136,11 +153,13 @@ extension TypeExtension on Type {
     } else if (data is List) {
       final reflection = reflectType(this);
       final reflectionClassMirror = (reflection as ClassMirror);
-      final listInstance = reflectionClassMirror._instantiateUsingDefaultConstructor();
+      final listInstance =
+          reflectionClassMirror._instantiateUsingDefaultConstructor();
       if (listInstance is List) {
         for (var rawValue in data) {
           if (reflectionClassMirror.isGeneric) {
-            final actualType = reflectionClassMirror.typeArguments.first.reflectedType;
+            final actualType =
+                reflectionClassMirror.typeArguments.first.reflectedType;
             final actualValue = actualType.fromJson(rawValue);
             listInstance.add(actualValue);
           } else {
@@ -154,7 +173,8 @@ extension TypeExtension on Type {
     } else if (data is Map) {
       final reflection = reflectType(this);
       final reflectionClassMirror = (reflection as ClassMirror);
-      final mapInstance = reflectionClassMirror._instantiateUsingDefaultConstructor();
+      final mapInstance =
+          reflectionClassMirror._instantiateUsingDefaultConstructor();
       if (reflectionClassMirror.isMap) {
         for (var kv in data.entries) {
           final rawKeyData = kv.key;
@@ -172,9 +192,9 @@ extension TypeExtension on Type {
           DeclarationMirror? declarationMirror;
           for (var declaration in reflectionClassMirror.declarations.entries) {
             /// this hack is needed to be able to access private fields
-            /// simply calling reflectionClassMirror.declarations[Symbol(kv.key)]; won't work 
+            /// simply calling reflectionClassMirror.declarations[Symbol(kv.key)]; won't work
             /// in this case since private keys have unique namings based on their hash
-            /// toName() extension doesn't care for that, it uses a RegExp to parse 
+            /// toName() extension doesn't care for that, it uses a RegExp to parse
             /// the name
             final simpleName = declaration.key.toName();
             if (simpleName == kv.key) {
@@ -182,7 +202,8 @@ extension TypeExtension on Type {
               break;
             }
           }
-          if (declarationMirror != null && declarationMirror is VariableMirror) {
+          if (declarationMirror != null &&
+              declarationMirror is VariableMirror) {
             final VariableMirror variableMirror = declarationMirror;
             if (variableMirror.isConst || variableMirror.isJsonIgnored) {
               continue;
@@ -220,13 +241,6 @@ extension TypeExtension on Type {
                 actualValue: value,
               );
             }
-            // final keyNameConvertor = variableMirror.tryGetKeyNameConverter(
-            //   variableName: variableName,
-            // );
-            // if (keyNameConvertor != null) {
-            //   print(keyNameConvertor);
-            // }
-
             instanceMirror.setField(
               variableMirror.simpleName,
               value,
@@ -248,9 +262,15 @@ extension _VariableMirrorExtension on VariableMirror {
 
   String tryConvertVariableNameViaAnnotation({
     required String variableName,
+    required JsonKeyNameConverter? keyNameConverter,
   }) {
     final converter = tryGetKeyNameConverter(variableName: variableName);
-    variableName = converter?.convert(variableName) ?? variableName;
+    if (converter == null) {
+      variableName = keyNameConverter?.convert(variableName) ?? variableName;
+    } else {
+      variableName = converter.convert(variableName);
+    }
+
     return variableName;
   }
 
@@ -279,9 +299,31 @@ extension _VariableMirrorExtension on VariableMirror {
   bool get isJsonIncluded {
     return getAnnotationsOfType<JsonKey>().firstOrNull?.isIncluded == true;
   }
+
+  String? get alternativeName {
+    return getAnnotationsOfType<JsonKey>()
+        .firstWhereOrNull((e) => e.name != null)
+        ?.name;
+  }
 }
 
 extension _ClassMirrorExtension on ClassMirror {
+  Iterable<T> getAnnotationsOfType<T>() {
+    return metadata.map((e) => e.reflectee).whereType<T>();
+  }
+
+  JsonKeyNameConverter? tryGetKeyNameConverter() {
+    final keyNameConvertors = getAnnotationsOfType<JsonKeyNameConverter>();
+    final numConverters = keyNameConvertors.length;
+    if (numConverters > 0) {
+      if (numConverters > 1) {
+        throw 'You can only apply one annotation of type $JsonKeyNameConverter to a class.';
+      }
+      return keyNameConvertors.first;
+    }
+    return null;
+  }
+
   Symbol get _defaultConstructorName {
     if (isList) {
       return const Symbol('empty');

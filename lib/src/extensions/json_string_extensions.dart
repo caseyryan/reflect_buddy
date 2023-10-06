@@ -1,5 +1,3 @@
-
-
 RegExp _uppercase = RegExp(r'[A-Z]');
 RegExp _oddUnderscores = RegExp(r'_{2,}');
 

@@ -1,17 +1,33 @@
 import 'package:reflect_buddy/reflect_buddy.dart';
 
 void main() {
-  _processSimpleUser(); 
-  _processSimpleUserWithPrivateId();
-  _processUserWrapperWithCustomDate();
-  
+  // _processSimpleUser();
+  // _processSimpleUserWithPrivateId();
+  // _processUserWrapperWithCustomDate();
+  // _keyNameConversion();
+  _convertKeyNamesByClassAnnotation();
 }
 
-/// Notice that this Enum also does not have any annotations 
+/// Notice that this Enum also does not have any annotations
 /// or helper methods
 enum Gender {
   male,
   female,
+}
+
+void _convertKeyNamesByClassAnnotation() {
+  final instance = fromJson<SimpleUserClassKeyNames>({
+    'firstName': 'Konstantin',
+    'lastName': 'Serov',
+    'age': 36,
+    'gender': 'male',
+    'dateOfBirth': '1987-01-02T21:50:45.241520'
+  });
+  print(instance);
+  final json = instance?.toJson(
+    keyNameConverter: CamelToSnake(),
+  );
+  print(json);
 }
 
 /// The most simple case. A flat structure with built-in types
@@ -45,6 +61,21 @@ void _processSimpleUserWithPrivateId() {
   print(json);
 }
 
+/// This instance has key converter annotations applied to its fields
+/// see inside [SimpleUserKeyConversion]
+void _keyNameConversion() {
+  final instance = fromJson<SimpleUserKeyConversion>({
+    'firstName': 'Konstantin',
+    'lastName': 'Serov',
+    'age': 36,
+    'gender': 'male',
+    'dateOfBirth': '1987-01-02T21:50:45.241520'
+  });
+  print(instance);
+  final json = instance?.toJson();
+  print(json);
+}
+
 /// Easy case. This type of class is
 /// the most simple to deserialize
 /// from JSON. All variable types are primitive
@@ -55,9 +86,34 @@ class SimpleUser {
   Gender? gender;
   DateTime? dateOfBirth;
 }
+
 class SimpleUserWithPrivateId {
   @JsonInclude()
   String? _id;
+  String? firstName;
+  String? lastName;
+  int age = 0;
+  Gender? gender;
+  DateTime? dateOfBirth;
+}
+
+/// An example of key transformation
+class SimpleUserKeyConversion {
+  @CamelToSnake()
+  String? firstName;
+  @CamelToSnake()
+  String? lastName;
+
+  @FirstToUpper()
+  int age = 0;
+  @FirstToUpper()
+  Gender? gender;
+  @FirstToUpper()
+  DateTime? dateOfBirth;
+}
+
+@CamelToSnake()
+class SimpleUserClassKeyNames {
   String? firstName;
   String? lastName;
   int age = 0;
@@ -96,12 +152,11 @@ class SimpleUserWithCustomDateFormat {
   String? lastName;
   int age = 0;
   Gender? gender;
+
   /// Applies a custom format to a date. It works in both directions
   @JsonDateConverter(dateFormat: 'yyyy_MM_dd')
   DateTime? dateOfBirth;
 }
-
-
 
 /// Even more complex but still not that much
 class ContainerWithCustomList {
