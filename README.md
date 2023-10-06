@@ -13,7 +13,7 @@
     - [Advantages](#advantages)
     - [Disadvantages](#disadvantages)
 - [Getting started](#getting-started)
-- [Serializing / Deserializing simple classes](#serializing-deserializing-simple-classes)
+- [Serializing and deserializing classes](#serializing-and-deserializing-classes)
 - [Using annotations](#using-annotations)
 - [Validators](#validators)
 - [Value converters](#value-converters)
