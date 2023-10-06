@@ -393,20 +393,30 @@ In this case, `JsonKey` will have the highest priority over any name converters
 
 ## List of Built-In Annotations
 
+### Field rules
 - `@JsonInclude()` - a field level annotation which forces the key/value to be included to a resulting JSON
 event if the field is private
 - `@JsonIgnore()` - the reverse of `JsonInclude`. It completely excludes the field from being serialized
 - `@JsonKey()` - base class for 
+
+### Validators
 - `@JsonValueValidator()` - **base class** can be extended for any type validation
 - `@JsonIntValidator()` - this annotation allows to to check if an int value is within the allowed rand. It will throw an exception if the value is beyond that
 - `@JsonDoubleValidator()` - the same as int validator but for double
 - `@JsonNumValidator()` - the same as int validator but for double
 - `@JsonStringValidator()` - can validate a string against a regular expression pattern
+- `@EmailValidator()` - validates an email against a regular expression
+- `@NameValidator()` - validates a name written in latin or cyrillic letters. If you need other letters, you should write your own validator. Take this one as an example
+
+### Value converters
 - `@JsonValueConverter()` - **base class**: can be extended for any type conversion
 - `@JsonDateConverter()` - allows you to provide a default date format for a DateTime, e.g. `yyyy-MM-dd` or some other
 - `@JsonIntConverter()` - this one allows to clamp an `int` value between min and max values or to give it a default value if the actual value is null
 - `@JsonNumConverter()` - the same as `int` converter but for `num`
 - `@JsonKeyNameConverter()` - **base class**: can be used to write custom converters
+- `@TrimString()` - trims white spaces from a string. Left, right or both
+
+### Key converters
 - `@CamelToSnake()` - converts a field name to `snake_case_style` 
 - `@SnakeToCamel()`- converts a field name to `camelCaseStyle` 
 - `@FirstToUpper()` - converts a first letter of a field name to upper case

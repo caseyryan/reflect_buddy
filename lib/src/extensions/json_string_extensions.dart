@@ -8,6 +8,11 @@ extension JsonStringExtensions on String {
     return '$first${substring(1)}';
   }
 
+  String lastCharacter() {
+    if (length < 1) return '';
+    return this[length - 1];
+  }
+
   String camelToSnake() {
     if (isEmpty) return this;
     final presplit = split('');

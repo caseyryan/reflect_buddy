@@ -2,19 +2,45 @@
 
 import 'package:reflect_buddy/reflect_buddy.dart';
 
-void main() {
-  // _processSimpleUser();
-  // _processSimpleUserWithPrivateId();
-  // _processUserWrapperWithCustomDate();
-  // _keyNameConversion();
-  _convertKeyNamesByClassAnnotation();
-}
-
 /// Notice that this Enum also does not have any annotations
 /// or helper methods
 enum Gender {
   male,
   female,
+}
+
+void main() {
+  /// Just uncomment any example to run it
+  // _processSimpleUser();
+  // _processSimpleUserWithPrivateId();
+  // _processUserWrapperWithCustomDate();
+  // _keyNameConversion();
+  // _convertKeyNamesByClassAnnotation();
+  _validateContacts();
+}
+
+/// Applies different contact validators
+void _validateContacts() {
+  final instance = fromJson<ContactData>({
+    'email': 'konstantin@github.com',
+
+    /// the white spaces will be trimmed by  @TrimString() annotation
+    'name': '     Константин     ',
+  });
+  print(instance);
+  final json = instance?.toJson(
+    keyNameConverter: CamelToSnake(),
+  );
+  print(json);
+}
+
+class ContactData {
+  @EmailValidator(canBeNull: false)
+  String? email;
+
+  @TrimString()
+  @NameValidator(canBeNull: false)
+  String? name;
 }
 
 void _convertKeyNamesByClassAnnotation() {
