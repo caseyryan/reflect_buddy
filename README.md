@@ -137,7 +137,7 @@ enum Gender {
 
 ```
 
-There is tree ways to create an instance of `ContainerWithCustomUsers` from JSON. They all use the same logic under the hood. So just pick the one you like the most.
+There are three ways to create an instance of `ContainerWithCustomUsers` from JSON. They all use the same logic under the hood. So just pick the one you like the most.
 
 1. Call `fromJson` method directly on a type like this (parentheses are required here to distinguish this call from a static method call)
 ```dart
