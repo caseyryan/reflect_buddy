@@ -25,8 +25,6 @@ extension JsonObjectExtension on Object {
   /// If you want to skip the unset values just pass false
   /// [keyNameConverter] if you need to apply some conversion
   /// on the resulting JSON key names, pass a converter here.
-  /// There is also there types of convertors available
-  /// []
   Object? toJson({
     bool includeNullValues = false,
     JsonKeyNameConverter? keyNameConverter,
