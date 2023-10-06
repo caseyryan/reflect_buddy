@@ -15,7 +15,7 @@
 - [Using annotations](#using-annotations)
 - [Validators](#validators)
 - [Value converters](#validators)
-- [List of Annotations](#list-of-annotations)
+- [List of Built-In Annotations](#list-of-built-in-annotations)
 
 
 ---
@@ -44,7 +44,7 @@ The tool was originally developed as a component of my other project: [Dart Net 
 
 ### How it works
 Imagine you have some class, for example a User, which contains the typical 
-values like first name, last name, age, id and other stuff like that. You want to send the instance of the user over a network. Of course you need to serialize it to some simple data like a JSON String.сщ  
+values like first name, last name, age, id and other stuff like that. You want to send the instance of the user over a network. Of course you need to serialize it to some simple data like a JSON String.
 
 Usually you need to write toJson() method by hand or use some template for a code generator like this package [json_serializable](https://pub.dev/packages/json_serializable). It's a very good option if you use The [AOT](https://en.wikipedia.org/wiki/Ahead-of-time_compilation) compilation. But in [JIT](https://en.wikipedia.org/wiki/Just-in-time_compilation) you can dramatically simplify it by just calling ```toJson()``` on any instance. That's it. It is really that simple
 
@@ -208,7 +208,9 @@ class SimpleUser {
 ## Validators
 
 There is also often a need to validate values before assigning them. You can use `JsonValueValidator` descendants for this purpose. This is the abstract class with only one method called `validate`. The method is called internally by **Reflect Buddy** and it accepts two arguments: the actual value that is about to be assigned to a field and the name of the field (for logging purposes). 
-You can extend `JsonValueValidator` class and write your own logic of a value validation for any fields ypu want. If the value is invalid, just throw an exception. You can see an example of such an implementation in `JsonNumValidator`
+You can extend `JsonValueValidator` class and write your own logic of a value validation for any fields you want. If the value is invalid, just throw an exception. 
+
+Here's an example of the `JsonNumValidator` descendant
 
 ```dart 
 class JsonNumValidator extends JsonValueValidator {
@@ -305,7 +307,7 @@ class JsonNumConverter extends JsonValueConverter {
 
 
 
-## List of Built-in annotations
+## List of Built-In Annotations
 
 
 ## Writing custom annotations
