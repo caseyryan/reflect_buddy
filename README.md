@@ -1,5 +1,7 @@
 # Reflect Buddy 
 
+<a href="https://pub.dev/packages/reflect_buddy"><img src="https://img.shields.io/pub/v/reflect_buddy?logo=dart" alt="pub.dev"></a>[![style: effective dart](https://img.shields.io/badge/style-effective_dart-40c4ff.svg)](https://pub.dev/packages/effective_dart) 
+
 ## A powerful live Dart JSON serializer / deserializer based on reflection ([dart:mirrors](https://api.dart.dev/stable/3.1.3/dart-mirrors/dart-mirrors-library.html))
 
 - [Small Intro](#small-intro)
@@ -17,6 +19,7 @@
 - [Value converters](#validators)
 - [Key name converters](#key-name-converters)
 - [List of Built-In Annotations](#list-of-built-in-annotations)
+- [Writing custom annotations](#writing-custom-annotations)
 
 
 ---
