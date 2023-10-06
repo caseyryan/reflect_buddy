@@ -1,3 +1,5 @@
+## 1.0.4
+- Fixed readme anchors
 ## 1.0.3
 
 - Added 2 validators and one converter
