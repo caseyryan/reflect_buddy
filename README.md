@@ -38,6 +38,7 @@ Having been involved in a C# development in the past, I always liked its ability
 
 ## The concept
 This library is used to generate strictly typed objects based on JSON input without the need to prepare any models in advance. It works at runtime, literally on the fly.
+The library can serialize and deserialize objects with any nesting depth.
 
 Most of the serializers in Dart are written using code builders. This is due to the fact that, most often, they are used with [Flutter](https://flutter.dev), the release assembly of which uses, so called, [Ahead of Time](https://en.wikipedia.org/wiki/Ahead-of-time_compilation) compilation. The [AOT](https://en.wikipedia.org/wiki/Ahead-of-time_compilation) compilation, makes it impossible to assemble types at runtime. All of the types there are known in advance.
 
