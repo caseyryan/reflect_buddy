@@ -69,6 +69,7 @@ class CompositeMessageLookup implements MessageLookup {
   /// If we do not already have a locale for [localeName] then
   /// [findLocale] will be called and the result stored as the lookup
   /// mechanism for that locale.
+  @override
   void addLocale(String localeName, Function findLocale) {
     if (localeExists(localeName)) return;
     var canonical = Intl.canonicalizedLocale(localeName);
@@ -133,6 +134,7 @@ abstract class MessageLookupByLibrary {
   /// Subclasses should override this to return their locale, e.g. 'en_US'
   String get localeName;
 
+  @override
   String toString() => localeName;
 
   /// Return a function that returns the given string.

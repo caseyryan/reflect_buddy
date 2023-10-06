@@ -149,6 +149,7 @@ class _LoosePatternField extends _DateFormatPatternField {
 
   /// Parse from a list of possibilities, but case-insensitively.
   /// Assumes that input is lower case.
+  @override
   int parseEnumeratedString(IntlStream input, List<String> possibilities) {
     var lowercasePossibilities =
         possibilities.map((x) => x.toLowerCase()).toList();
