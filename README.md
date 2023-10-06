@@ -156,7 +156,7 @@ final containerInstance = containerWithUsers.toInstance<ContainerWithCustomUsers
 ```
 
 
-## Serializing / Deserializing simple classes
+## Serializing and deserializing classes
 
 Any work with JSON sometimes requires hiding or, conversely, adding certain keys to the output.
 For example, in your User model, `_id` is a private field, but you want to return it to the frontend to be able to uniquely identify the object.
