@@ -2,6 +2,8 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+// ignore_for_file: library_private_types_in_public_api
+
 import '../../date_symbols.dart';
 import '../date_format_internal.dart';
 import '../intl_helpers.dart' as helpers;

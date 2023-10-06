@@ -22,7 +22,7 @@ import 'src/intl_helpers.dart';
 /// of individual [MessageLookupByLibrary] instances.
 class CompositeMessageLookup implements MessageLookup {
   /// A map from locale names to the corresponding lookups.
-  Map<String, MessageLookupByLibrary> availableMessages = Map();
+  Map<String, MessageLookupByLibrary> availableMessages = {};
 
   /// Return true if we have a message lookup for [localeName].
   bool localeExists(localeName) => availableMessages.containsKey(localeName);
@@ -39,6 +39,7 @@ class CompositeMessageLookup implements MessageLookup {
   /// Look up the message with the given [name] and [locale] and return the
   /// translated version with the values in [args] interpolated.  If nothing is
   /// found, return the result of [ifAbsent] or [messageText].
+  @override
   String? lookupMessage(String? messageText, String? locale, String? name,
       List<Object>? args, String? meaning,
       {MessageIfAbsent? ifAbsent}) {

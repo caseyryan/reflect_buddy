@@ -797,6 +797,7 @@ class NumberFormat {
     _finalGroupingSize = 0;
   }
 
+  @override
   String toString() => 'NumberFormat($_locale, $_pattern)';
 }
 

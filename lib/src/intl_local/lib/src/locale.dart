@@ -26,7 +26,7 @@ abstract class Locale {
       LocaleImplementation.fromSubtags(
           languageCode: languageCode,
           scriptCode: scriptCode,
-          countryCode: countryCode) as Locale;
+          countryCode: countryCode);
 
   /// Parses [Unicode Locale Identifiers][localeIds] to produce [Locale]
   /// instances.
@@ -43,7 +43,7 @@ abstract class Locale {
       throw FormatException('Locale "$localeIdentifier": '
           '${parser.problems.join("; ")}.');
     }
-    return locale as Locale;
+    return locale;
   }
 
   /// Parses [Unicode Locale Identifiers][localeIds] to produce [Locale]

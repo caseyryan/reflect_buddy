@@ -1,5 +1,6 @@
 import 'dart:mirrors';
 
+// ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
 import 'package:reflect_buddy/src/annotations/json_annotations.dart';
 

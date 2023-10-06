@@ -82,6 +82,7 @@ class UninitializedLocaleData<F> implements MessageLookup {
         ', call $message.');
   }
 
+  @override
   void addLocale(String localeName, Function findLocale) => _throwException();
 }
 
