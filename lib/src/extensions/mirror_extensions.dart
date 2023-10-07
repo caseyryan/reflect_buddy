@@ -30,6 +30,9 @@ extension JsonObjectExtension on Object {
     bool includeNullValues = false,
     JsonKeyNameConverter? keyNameConverter,
   }) {
+    if (runtimeType.isPrimitive) {
+      return this;
+    }
     final instanceMirror = reflect(this);
     final Map<String, dynamic> json = {};
     JsonKeyNameConverter? classLevelKeyNameConverter =
