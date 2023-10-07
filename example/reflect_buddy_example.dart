@@ -16,7 +16,9 @@ void main() {
   // _processUserWrapperWithCustomDate();
   // _keyNameConversion();
   // _convertKeyNamesByClassAnnotation();
-  _validateContacts();
+  // _validateContacts();
+  final result = 'Some string'.toJson();
+  print(result);
 }
 
 /// Applies different contact validators
