@@ -15,8 +15,8 @@ void main() {
   // _processSimpleUserWithPrivateId();
   // _processUserWrapperWithCustomDate();
   // _keyNameConversion();
-  _convertKeyNamesByClassAnnotation();
-  // _validateContacts();
+  // _convertKeyNamesByClassAnnotation();
+  _validateContacts();
 }
 
 /// Applies different contact validators
@@ -26,6 +26,9 @@ void _validateContacts() {
 
     /// the white spaces will be trimmed by  @TrimString() annotation
     'name': '     Константин     ',
+    'phone': '+7 (945) 234-12-12',
+    // 'creditCard': '5479 9588 6475 9774',
+    'creditCard': '5536 9138 3148 5962',
   });
   print(instance);
   final json = instance?.toJson(
@@ -37,6 +40,13 @@ void _validateContacts() {
 class ContactData {
   @EmailValidator(canBeNull: false)
   String? email;
+  @PhoneValidator(canBeNull: false)
+  String? phone;
+  @CreditCardNumberValidator(
+    canBeNull: false,
+    useLuhnAlgo: true,
+  )
+  String? creditCard;
 
   @TrimString()
   @NameValidator(canBeNull: false)

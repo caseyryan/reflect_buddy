@@ -402,7 +402,11 @@ event if the field is private
 - `@JsonNumValidator()` - the same as int validator but for double
 - `@JsonStringValidator()` - can validate a string against a regular expression pattern
 - `@EmailValidator()` - validates an email against a regular expression
+- `@JsonPasswordValidator()` - a password validator with options
+- `@CreditCardNumberValidator()` - a credit card number validator that can use Luhn algorithm
+- `@PhoneValidator()` - a phone validator which validates upon a database of country phone codes and phone masks which makes it more reliable than the one base on regular expression 
 - `@NameValidator()` - validates a name written in latin or cyrillic letters. If you need other letters, you should write your own validator. Take this one as an example
+
 
 ### Value converters
 - `@JsonValueConverter()` - **base class**: can be extended for any type conversion

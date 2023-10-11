@@ -1,4 +1,6 @@
 import 'package:reflect_buddy/reflect_buddy.dart';
+import 'package:reflect_buddy/src/annotations/_card_validator_support.dart';
+import 'package:reflect_buddy/src/annotations/_phone_validator_support.dart';
 import 'package:reflect_buddy/src/intl_local/lib/intl.dart';
 
 part '_key_name_converters.dart';
