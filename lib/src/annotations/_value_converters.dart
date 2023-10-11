@@ -35,8 +35,8 @@ class JsonDateConverter extends JsonValueConverter {
 }
 
 /// Trims a string before assigning
-class TrimString extends JsonValueConverter {
-  const TrimString({
+class JsonTrimString extends JsonValueConverter {
+  const JsonTrimString({
     this.trimLeft = true,
     this.trimRight = true,
   });

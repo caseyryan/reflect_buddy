@@ -215,11 +215,11 @@ class SimpleUser {
 There is also often a need to validate values before assigning them. You can use `JsonValueValidator` descendants for this purpose. This is the abstract class with only one method called `validate`. The method is called internally by **Reflect Buddy** and it accepts two arguments: the actual value that is about to be assigned to a field and the name of the field (for logging purposes). 
 You can extend `JsonValueValidator` class and write your own logic of a value validation for any fields you want. If the value is invalid, just throw an exception. 
 
-Here's an example of the `JsonNumValidator` descendant
+Here's an example of the `NumValidator` descendant
 
 ```dart 
-class JsonNumValidator extends JsonValueValidator {
-  const JsonNumValidator({
+class NumValidator extends JsonValueValidator {
+  const NumValidator({
     required this.minValue,
     required this.maxValue,
     required super.canBeNull,
@@ -397,12 +397,12 @@ event if the field is private
 
 ### Validators
 - `@JsonValueValidator()` - **base class** can be extended for any type validation
-- `@JsonIntValidator()` - this annotation allows to to check if an int value is within the allowed rand. It will throw an exception if the value is beyond that
-- `@JsonDoubleValidator()` - the same as int validator but for double
-- `@JsonNumValidator()` - the same as int validator but for double
+- `@IntValidator()` - this annotation allows to to check if an int value is within the allowed rand. It will throw an exception if the value is beyond that
+- `@DoubleValidator()` - the same as int validator but for double
+- `@NumValidator()` - the same as int validator but for double
 - `@JsonStringValidator()` - can validate a string against a regular expression pattern
 - `@EmailValidator()` - validates an email against a regular expression
-- `@JsonPasswordValidator()` - a password validator with options
+- `@PasswordValidator()` - a password validator with options
 - `@CreditCardNumberValidator()` - a credit card number validator that can use Luhn algorithm
 - `@PhoneValidator()` - a phone validator which validates upon a database of country phone codes and phone masks which makes it more reliable than the one base on regular expression 
 - `@NameValidator()` - validates a name written in latin or cyrillic letters. If you need other letters, you should write your own validator. Take this one as an example
@@ -414,7 +414,7 @@ event if the field is private
 - `@JsonIntConverter()` - this one allows to clamp an `int` value between min and max values or to give it a default value if the actual value is null
 - `@JsonNumConverter()` - the same as `int` converter but for `num`
 - `@JsonKeyNameConverter()` - **base class**: can be used to write custom converters
-- `@TrimString()` - trims white spaces from a string. Left, right or both
+- `@JsonTrimString()` - trims white spaces from a string. Left, right or both
 
 ### Key converters
 - `@CamelToSnake()` - converts a field name to `snake_case_style` 

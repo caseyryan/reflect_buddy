@@ -24,7 +24,7 @@ void _validateContacts() {
   final instance = fromJson<ContactData>({
     'email': 'konstantin@github.com',
 
-    /// the white spaces will be trimmed by  @TrimString() annotation
+    /// the white spaces will be trimmed by  @JsonTrimString() annotation
     'name': '     Константин     ',
     'phone': '+7 (945) 234-12-12',
     // 'creditCard': '5479 9588 6475 9774',
@@ -48,7 +48,7 @@ class ContactData {
   )
   String? creditCard;
 
-  @TrimString()
+  @JsonTrimString()
   @NameValidator(canBeNull: false)
   String? name;
 }

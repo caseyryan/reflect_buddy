@@ -3,7 +3,7 @@ part of 'json_annotations.dart';
 /// If you need to validate a value before assigning it to
 /// a field, you can annotate the field with a descendant of
 /// this class. You can use many of these validators on a field
-/// You can see an example implementation in [JsonIntValidator]
+/// You can see an example implementation in [IntValidator]
 /// If a validator does not validate a value it must throw an exception
 abstract class JsonValueValidator {
   const JsonValueValidator({
@@ -38,8 +38,8 @@ abstract class JsonValueValidator {
   });
 }
 
-class JsonIntValidator extends JsonNumValidator {
-  const JsonIntValidator({
+class IntValidator extends NumValidator {
+  const IntValidator({
     required int minValue,
     required int maxValue,
     required super.canBeNull,
@@ -49,8 +49,8 @@ class JsonIntValidator extends JsonNumValidator {
         );
 }
 
-class JsonDoubleValidator extends JsonNumValidator {
-  const JsonDoubleValidator({
+class DoubleValidator extends NumValidator {
+  const DoubleValidator({
     required double minValue,
     required double maxValue,
     required super.canBeNull,
@@ -60,8 +60,8 @@ class JsonDoubleValidator extends JsonNumValidator {
         );
 }
 
-class JsonNumValidator extends JsonValueValidator {
-  const JsonNumValidator({
+class NumValidator extends JsonValueValidator {
+  const NumValidator({
     required this.minValue,
     required this.maxValue,
     required super.canBeNull,
@@ -149,14 +149,14 @@ class EmailValidator extends JsonValueValidator {
   }
 }
 
-class JsonPasswordValidator extends JsonValueValidator {
+class PasswordValidator extends JsonValueValidator {
   static final _digitsRegex = RegExp(r'[0-9]+');
   static final _upperCaseLettersRegex = RegExp(r'[A-ZА-ЯЁ]+');
   static final _lowerCaseLettersRegex = RegExp(r'[a-zа-яё]+');
   static final _specialCharRegex =
       RegExp("[\"!#\$%&')(*+,-\\.\\/:;<=>?@\\][^_`|}{~]+");
 
-  const JsonPasswordValidator({
+  const PasswordValidator({
     this.minDigits = 1,
     this.minLength = 8,
     this.minLowerCaseLetters = 1,
