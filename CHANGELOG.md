@@ -1,3 +1,5 @@
+## 1.0.7
+- checkForNull method in value validators is not public
 ## 1.0.6
 - Fixed toJson for primitive types
 ## 1.0.4

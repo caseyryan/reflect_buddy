@@ -58,7 +58,7 @@ class JsonNumValidator extends JsonValueValidator {
     num? actualValue,
     required String fieldName,
   }) {
-    if (_initiallyValidated(
+    if (checkForNull(
       canBeNull: canBeNull,
       fieldName: fieldName,
       actualValue: actualValue,
@@ -85,7 +85,7 @@ class JsonStringValidator extends JsonValueValidator {
     String? actualValue,
     required String fieldName,
   }) {
-    if (_initiallyValidated(
+    if (checkForNull(
       canBeNull: canBeNull,
       fieldName: fieldName,
       actualValue: actualValue,
@@ -120,7 +120,7 @@ class EmailValidator extends JsonValueValidator {
     covariant String? actualValue,
     required String fieldName,
   }) {
-    if (_initiallyValidated(
+    if (checkForNull(
       canBeNull: canBeNull,
       fieldName: fieldName,
       actualValue: actualValue,
@@ -181,7 +181,7 @@ class NameValidator extends JsonValueValidator {
     covariant String? actualValue,
     required String fieldName,
   }) {
-    if (_initiallyValidated(
+    if (checkForNull(
       canBeNull: canBeNull,
       fieldName: fieldName,
       actualValue: actualValue,
@@ -197,7 +197,7 @@ class NameValidator extends JsonValueValidator {
   }
 }
 
-bool _initiallyValidated({
+bool checkForNull({
   Object? actualValue,
   required bool canBeNull,
   required String fieldName,

@@ -222,27 +222,23 @@ class JsonNumValidator extends JsonValueValidator {
   const JsonNumValidator({
     required this.minValue,
     required this.maxValue,
-    required this.canBeNull,
+    required super.canBeNull,
   });
 
   final num minValue;
   final num maxValue;
-  final bool canBeNull;
 
   @override
   void validate({
     num? actualValue,
     required String fieldName,
   }) {
-    if (!canBeNull) {
-      if (actualValue == null) {
-        throw Exception(
-          '"$actualValue" value is not allowed for [$fieldName]',
-        );
-      }
-    }
-    if (actualValue != null) {
-      if (actualValue < minValue || actualValue > maxValue) {
+    if (checkForNull(
+      canBeNull: canBeNull,
+      fieldName: fieldName,
+      actualValue: actualValue,
+    )) {
+      if (actualValue! < minValue || actualValue > maxValue) {
         throw Exception(
           '"$actualValue" is out of scope for "$fieldName" expected ($minValue - $maxValue)',
         );
