@@ -198,7 +198,7 @@ class NameValidator extends JsonValueValidator {
 }
 
 bool checkForNull({
-  Object? actualValue,
+  required Object? actualValue,
   required bool canBeNull,
   required String fieldName,
 }) {

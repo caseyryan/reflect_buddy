@@ -1,3 +1,5 @@
+## 1.0.8
+- actualValue in checkForNull is now required
 ## 1.0.7
 - checkForNull method in value validators is not public
 ## 1.0.6
