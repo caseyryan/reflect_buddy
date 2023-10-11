@@ -400,7 +400,7 @@ event if the field is private
 - `@IntValidator()` - this annotation allows to to check if an int value is within the allowed rand. It will throw an exception if the value is beyond that
 - `@DoubleValidator()` - the same as int validator but for double
 - `@NumValidator()` - the same as int validator but for double
-- `@JsonStringValidator()` - can validate a string against a regular expression pattern
+- `@StringValidator()` - can validate a string against a regular expression pattern
 - `@EmailValidator()` - validates an email against a regular expression
 - `@PasswordValidator()` - a password validator with options
 - `@CreditCardNumberValidator()` - a credit card number validator that can use Luhn algorithm

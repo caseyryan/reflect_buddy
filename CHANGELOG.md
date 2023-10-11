@@ -1,4 +1,4 @@
-## 1.1.0
+## 1.1.1
 - Renamed some validators and converters
 ## 1.0.11
 - Added PasswordValidator with configuration

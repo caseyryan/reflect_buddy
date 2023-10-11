@@ -89,8 +89,8 @@ class NumValidator extends JsonValueValidator {
   }
 }
 
-class JsonStringValidator extends JsonValueValidator {
-  const JsonStringValidator({
+class StringValidator extends JsonValueValidator {
+  const StringValidator({
     required super.canBeNull,
     this.regExpPattern,
   });
