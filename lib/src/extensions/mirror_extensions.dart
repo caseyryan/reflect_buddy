@@ -32,6 +32,16 @@ extension JsonObjectExtension on Object {
   }) {
     if (runtimeType.isPrimitive) {
       return this;
+    } else if (this is Map) {
+      final newMap = {};
+      final curMap = this as Map;
+      for (var kv in curMap.entries) {
+        newMap[(kv.key as Object).toJson()] = (kv.value as Object).toJson(
+          includeNullValues: includeNullValues,
+          keyNameConverter: keyNameConverter,
+        );
+      }
+      return newMap;
     }
     final instanceMirror = reflect(this);
     final Map<String, dynamic> json = {};

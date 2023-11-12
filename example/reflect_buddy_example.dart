@@ -10,6 +10,13 @@ enum Gender {
 }
 
 void main() {
+  final data = {
+    'payload': 'Some string',
+  };
+  final json = data.toJson();
+  print(json);
+  return;
+
   /// Just uncomment any example to run it
   // _processSimpleUser();
   // _processSimpleUserWithPrivateId();
