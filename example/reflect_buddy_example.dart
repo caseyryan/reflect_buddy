@@ -9,9 +9,7 @@ enum Gender {
   female,
 }
 
-
 void main() {
-
   /// Just uncomment any example to run it
   // _processSimpleUser();
   // _processSimpleUserWithPrivateId();

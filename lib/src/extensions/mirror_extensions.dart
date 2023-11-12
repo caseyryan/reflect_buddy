@@ -155,6 +155,7 @@ extension TypeExtension on Type {
   }
 
   Object? fromJson(Object? data) {
+    print(this);
     if (data == null) {
       return null;
     } else if (this == data.runtimeType) {
@@ -265,14 +266,15 @@ extension TypeExtension on Type {
                   You must replace the declaration with a strictly typed one
                 ''';
               }
-              /// This is the most dangerous situation. You SHOULD 
-              /// always try to avoid 
+
+              /// This is the most dangerous situation. You SHOULD
+              /// always try to avoid
               /// using dynamic type in your model declarations where it's possible
-              /// since the value is set as is (with no validations or conversions) 
-              /// and it is not guaranteed that this will 
-              /// be an acceptable value. 
+              /// since the value is set as is (with no validations or conversions)
+              /// and it is not guaranteed that this will
+              /// be an acceptable value.
               /// And of course, never try to use `dynamic` where some non-primitive
-              /// value is expected since it will just not work 
+              /// value is expected since it will just not work
               instanceMirror.setField(
                 variableMirror.simpleName,
                 kv.value,
@@ -281,6 +283,21 @@ extension TypeExtension on Type {
           }
         }
         return mapInstance;
+      }
+    } else {
+      /// This might be the case when an Enum is expected
+      /// but a string is passed, for example
+      final reflection = reflectType(this);
+      final reflectionClassMirror = (reflection as ClassMirror);
+      final isEnum = reflectionClassMirror.isEnum;
+      if (isEnum && data is! Enum) {
+        return reflectionClassMirror.reflectedType.newEnumInstance(data);
+      } else {
+        throw '''
+          Value is unsupported. Please report this case: https://github.com/caseyryan/reflect_buddy/issues
+          Expected value type: ${reflectionClassMirror.reflectedType}
+          Actual value: $data
+        ''';
       }
     }
 

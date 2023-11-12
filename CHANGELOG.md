@@ -1,3 +1,5 @@
+## 1.1.6
+- Added support for Enums as primitive values
 ## 1.1.5
 - Fixed broken type check
 ## 1.1.4
