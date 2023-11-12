@@ -224,7 +224,7 @@ extension TypeExtension on Type {
                 continue;
               }
             }
-            if (variableMirror is ClassMirror) {
+            if (variableMirror.type is ClassMirror) {
               final variableClassMirror = variableMirror.type as ClassMirror;
               final fieldType = variableMirror.type.hasReflectedType
                   ? variableClassMirror.reflectedType
