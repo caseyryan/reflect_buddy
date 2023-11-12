@@ -76,8 +76,7 @@ extension JsonObjectExtension on Object {
           }
         }
         final alternativeName = variableMirror.alternativeName;
-        final valueConverters =
-            variableMirror.getAnnotationsOfType<JsonValueConverter>();
+        final valueConverters = variableMirror.getAnnotationsOfType<JsonValueConverter>();
         for (final converter in valueConverters) {
           rawValue = converter.convert(rawValue);
         }
@@ -135,6 +134,10 @@ extension TypeExtension on Type {
     return classMirror._instantiateEnum(value);
   }
 
+  bool get isDynamic {
+    return toString().contains('dynamic');
+  }
+
   bool get isPrimitive {
     switch (this) {
       case String:
@@ -165,13 +168,11 @@ extension TypeExtension on Type {
     } else if (data is List) {
       final reflection = reflectType(this);
       final reflectionClassMirror = (reflection as ClassMirror);
-      final listInstance =
-          reflectionClassMirror._instantiateUsingDefaultConstructor();
+      final listInstance = reflectionClassMirror._instantiateUsingDefaultConstructor();
       if (listInstance is List) {
         for (var rawValue in data) {
           if (reflectionClassMirror.isGeneric) {
-            final actualType =
-                reflectionClassMirror.typeArguments.first.reflectedType;
+            final actualType = reflectionClassMirror.typeArguments.first.reflectedType;
             final actualValue = actualType.fromJson(rawValue);
             listInstance.add(actualValue);
           } else {
@@ -185,8 +186,7 @@ extension TypeExtension on Type {
     } else if (data is Map) {
       final reflection = reflectType(this);
       final reflectionClassMirror = (reflection as ClassMirror);
-      final mapInstance =
-          reflectionClassMirror._instantiateUsingDefaultConstructor();
+      final mapInstance = reflectionClassMirror._instantiateUsingDefaultConstructor();
       if (reflectionClassMirror.isMap) {
         for (var kv in data.entries) {
           final rawKeyData = kv.key;
@@ -214,8 +214,7 @@ extension TypeExtension on Type {
               break;
             }
           }
-          if (declarationMirror != null &&
-              declarationMirror is VariableMirror) {
+          if (declarationMirror != null && declarationMirror is VariableMirror) {
             final VariableMirror variableMirror = declarationMirror;
             if (variableMirror.isConst || variableMirror.isJsonIgnored) {
               continue;
@@ -225,38 +224,60 @@ extension TypeExtension on Type {
                 continue;
               }
             }
-            final variableClassMirror = variableMirror.type as ClassMirror;
-            final fieldType = variableMirror.type.hasReflectedType
-                ? variableClassMirror.reflectedType
-                : variableClassMirror.runtimeType;
-            final isEnum = variableClassMirror.isEnum;
+            if (variableMirror is ClassMirror) {
+              final variableClassMirror = variableMirror.type as ClassMirror;
+              final fieldType = variableMirror.type.hasReflectedType
+                  ? variableClassMirror.reflectedType
+                  : variableClassMirror.runtimeType;
+              final isEnum = variableClassMirror.isEnum;
 
-            final valueConverters =
-                variableMirror.getAnnotationsOfType<JsonValueConverter>();
-            var value = kv.value;
+              final valueConverters =
+                  variableMirror.getAnnotationsOfType<JsonValueConverter>();
+              var value = kv.value;
 
-            for (final converter in valueConverters) {
-              value = converter.convert(value);
-            }
-            if (isEnum && value is! Enum) {
-              value = fieldType.newEnumInstance(value);
-            }
+              for (final converter in valueConverters) {
+                value = converter.convert(value);
+              }
+              if (isEnum && value is! Enum) {
+                value = fieldType.newEnumInstance(value);
+              }
 
-            value = fieldType.fromJson(value);
+              value = fieldType.fromJson(value);
 
-            final valueValidators =
-                variableMirror.getAnnotationsOfType<JsonValueValidator>();
-            final variableName = variableMirror.simpleName.toName();
-            for (final validator in valueValidators) {
-              validator.validate(
-                fieldName: variableName,
-                actualValue: value,
+              final valueValidators =
+                  variableMirror.getAnnotationsOfType<JsonValueValidator>();
+              final variableName = variableMirror.simpleName.toName();
+              for (final validator in valueValidators) {
+                validator.validate(
+                  fieldName: variableName,
+                  actualValue: value,
+                );
+              }
+              instanceMirror.setField(
+                variableMirror.simpleName,
+                value,
+              );
+            } else if (variableMirror.type.reflectedType.isDynamic) {
+              if (!kv.value.runtimeType.isPrimitive) {
+                throw '''
+                  Your variable type is declared as `dynamic` 
+                  but the provided value is not primitive.
+                  You must replace the declaration with a strictly typed one
+                ''';
+              }
+              /// This is the most dangerous situation. You SHOULD 
+              /// always try to avoid 
+              /// using dynamic type in your model declarations where it's possible
+              /// since the value is set as is (with no validations or conversions) 
+              /// and it is not guaranteed that this will 
+              /// be an acceptable value. 
+              /// And of course, never try to use `dynamic` where some non-primitive
+              /// value is expected since it will just not work 
+              instanceMirror.setField(
+                variableMirror.simpleName,
+                kv.value,
               );
             }
-            instanceMirror.setField(
-              variableMirror.simpleName,
-              value,
-            );
           }
         }
         return mapInstance;
@@ -313,9 +334,7 @@ extension _VariableMirrorExtension on VariableMirror {
   }
 
   String? get alternativeName {
-    return getAnnotationsOfType<JsonKey>()
-        .firstWhereOrNull((e) => e.name != null)
-        ?.name;
+    return getAnnotationsOfType<JsonKey>().firstWhereOrNull((e) => e.name != null)?.name;
   }
 }
 

@@ -1,3 +1,5 @@
+## 1.1.4
+- Added a support for dynamic declarations
 ## 1.1.3
 - Added JsonPhoneConverter
 ## 1.1.2
