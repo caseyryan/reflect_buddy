@@ -1,3 +1,5 @@
+## 1.1.3
+- Added JsonPhoneConverter
 ## 1.1.2
 - Added a possibility to convert Map to JSON as well
 ## 1.1.1

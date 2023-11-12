@@ -2,6 +2,7 @@ import 'package:reflect_buddy/reflect_buddy.dart';
 import 'package:reflect_buddy/src/annotations/_card_validator_support.dart';
 import 'package:reflect_buddy/src/annotations/_phone_validator_support.dart';
 import 'package:reflect_buddy/src/intl_local/lib/intl.dart';
+import 'package:reflect_buddy/src/utils/formatter_utils.dart';
 
 part '_key_name_converters.dart';
 part '_value_converters.dart';

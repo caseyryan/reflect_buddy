@@ -71,6 +71,42 @@ class JsonIntConverter extends JsonNumConverter {
         );
 }
 
+enum PhoneStringType {
+  formatted,
+  unformatted,
+}
+
+class JsonPhoneConverter extends JsonValueConverter {
+  final PhoneStringType type;
+  final bool addLeadingPlus;
+  const JsonPhoneConverter({
+    this.type = PhoneStringType.unformatted,
+    this.addLeadingPlus = true,
+  });
+
+  @override
+  Object? convert(covariant Object? value) {
+    if (value is String) {
+      if (type == PhoneStringType.formatted) {
+        return formatAsPhoneNumber(value);
+      } else if (type == PhoneStringType.unformatted) {
+        /// we first format it to fix possible errors
+        final formatted = formatAsPhoneNumber(value);
+        final numbers = toNumericString(
+          formatted,
+          allowAllZeroes: true,
+          allowHyphen: true,
+        );
+        if (addLeadingPlus) {
+          return '+$numbers';
+        }
+        return numbers;
+      }
+    }
+    return value;
+  }
+}
+
 class JsonNumConverter extends JsonValueConverter {
   const JsonNumConverter({
     required this.minValue,

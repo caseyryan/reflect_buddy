@@ -415,6 +415,7 @@ event if the field is private
 - `@JsonNumConverter()` - the same as `int` converter but for `num`
 - `@JsonKeyNameConverter()` - **base class**: can be used to write custom converters
 - `@JsonTrimString()` - trims white spaces from a string. Left, right or both
+- `@JsonPhoneConverter()` - formats a phone or removes a format, depending on args
 
 ### Key converters
 - `@CamelToSnake()` - converts a field name to `snake_case_style` 
