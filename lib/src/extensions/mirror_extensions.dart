@@ -88,7 +88,6 @@ extension JsonObjectExtension on Object {
         if (rawValue.runtimeType.isPrimitive) {
           value = rawValue;
         } else if (rawValue is List) {
-          print(rawValue);
           value = rawValue.map(
             (Object? e) {
               return e?.toJson(
@@ -159,7 +158,6 @@ extension TypeExtension on Type {
   }
 
   Object? fromJson(Object? data) {
-    print(this);
     if (data == null) {
       return null;
     } else if (this == data.runtimeType) {

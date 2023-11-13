@@ -1,3 +1,5 @@
+## 1.1.8
+- Removed unnecessary prints
 ## 1.1.7
 - Added support for Enums as primitive values to `toJson`
 ## 1.1.6
