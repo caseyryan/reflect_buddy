@@ -1,3 +1,5 @@
+## 1.2.1
+- Allowed setting unknown value type to `dynamic` fields
 ## 1.2.0
 - Added conversion direction to `JsonValueConvertor`
 ## 1.1.8

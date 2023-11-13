@@ -266,14 +266,6 @@ extension TypeExtension on Type {
                 value,
               );
             } else if (variableMirror.type.reflectedType.isDynamic) {
-              if (!kv.value.runtimeType.isPrimitive) {
-                throw '''
-                  Your variable type is declared as `dynamic` 
-                  but the provided value is not primitive.
-                  You must replace the declaration with a strictly typed one
-                ''';
-              }
-
               /// This is the most dangerous situation. You SHOULD
               /// always try to avoid
               /// using dynamic type in your model declarations where it's possible
@@ -281,7 +273,7 @@ extension TypeExtension on Type {
               /// and it is not guaranteed that this will
               /// be an acceptable value.
               /// And of course, never try to use `dynamic` where some non-primitive
-              /// value is expected since it will just not work
+              /// value is expected since it might just not work
               instanceMirror.setField(
                 variableMirror.simpleName,
                 kv.value,
