@@ -1,5 +1,7 @@
+## 1.1.7
+- Added support for Enums as primitive values to `toJson`
 ## 1.1.6
-- Added support for Enums as primitive values
+- Added support for Enums as primitive values to `fromJson`
 ## 1.1.5
 - Fixed broken type check
 ## 1.1.4

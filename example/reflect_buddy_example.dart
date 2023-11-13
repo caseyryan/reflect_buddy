@@ -9,7 +9,18 @@ enum Gender {
   female,
 }
 
+class Genders {
+  List<Gender>? genders;
+}
+
 void main() {
+  final genders = Genders()
+    ..genders = [
+      Gender.female,
+    ];
+  print(genders.toJson());
+  return;
+
   /// Just uncomment any example to run it
   // _processSimpleUser();
   // _processSimpleUserWithPrivateId();
