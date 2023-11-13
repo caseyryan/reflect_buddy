@@ -78,10 +78,12 @@ extension JsonObjectExtension on Object {
           }
         }
         final alternativeName = variableMirror.alternativeName;
-        final valueConverters =
-            variableMirror.getAnnotationsOfType<JsonValueConverter>();
+        final valueConverters = variableMirror.getAnnotationsOfType<JsonValueConverter>();
         for (final converter in valueConverters) {
-          rawValue = converter.convert(rawValue);
+          rawValue = converter.convert(
+            rawValue,
+            ConvertDirection.toJson,
+          );
         }
 
         Object? value;
@@ -171,13 +173,11 @@ extension TypeExtension on Type {
     } else if (data is List) {
       final reflection = reflectType(this);
       final reflectionClassMirror = (reflection as ClassMirror);
-      final listInstance =
-          reflectionClassMirror._instantiateUsingDefaultConstructor();
+      final listInstance = reflectionClassMirror._instantiateUsingDefaultConstructor();
       if (listInstance is List) {
         for (var rawValue in data) {
           if (reflectionClassMirror.isGeneric) {
-            final actualType =
-                reflectionClassMirror.typeArguments.first.reflectedType;
+            final actualType = reflectionClassMirror.typeArguments.first.reflectedType;
             final actualValue = actualType.fromJson(rawValue);
             listInstance.add(actualValue);
           } else {
@@ -191,8 +191,7 @@ extension TypeExtension on Type {
     } else if (data is Map) {
       final reflection = reflectType(this);
       final reflectionClassMirror = (reflection as ClassMirror);
-      final mapInstance =
-          reflectionClassMirror._instantiateUsingDefaultConstructor();
+      final mapInstance = reflectionClassMirror._instantiateUsingDefaultConstructor();
       if (reflectionClassMirror.isMap) {
         for (var kv in data.entries) {
           final rawKeyData = kv.key;
@@ -220,8 +219,7 @@ extension TypeExtension on Type {
               break;
             }
           }
-          if (declarationMirror != null &&
-              declarationMirror is VariableMirror) {
+          if (declarationMirror != null && declarationMirror is VariableMirror) {
             final VariableMirror variableMirror = declarationMirror;
             if (variableMirror.isConst || variableMirror.isJsonIgnored) {
               continue;
@@ -243,7 +241,10 @@ extension TypeExtension on Type {
               var value = kv.value;
 
               for (final converter in valueConverters) {
-                value = converter.convert(value);
+                value = converter.convert(
+                  value,
+                  ConvertDirection.fromJson,
+                );
               }
               if (isEnum && value is! Enum) {
                 value = fieldType.newEnumInstance(value);
@@ -357,9 +358,7 @@ extension _VariableMirrorExtension on VariableMirror {
   }
 
   String? get alternativeName {
-    return getAnnotationsOfType<JsonKey>()
-        .firstWhereOrNull((e) => e.name != null)
-        ?.name;
+    return getAnnotationsOfType<JsonKey>().firstWhereOrNull((e) => e.name != null)?.name;
   }
 }
 

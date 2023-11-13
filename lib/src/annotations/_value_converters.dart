@@ -1,5 +1,10 @@
 part of 'json_annotations.dart';
 
+enum ConvertDirection {
+  fromJson,
+  toJson,
+}
+
 /// Similar to [JsonValueValidator] but it must not
 /// throw any exceptions but convert a value instead
 /// For example: you get 101 from your json map, but an
@@ -12,7 +17,10 @@ part of 'json_annotations.dart';
 abstract class JsonValueConverter {
   const JsonValueConverter();
 
-  Object? convert(covariant Object? value);
+  Object? convert(
+    covariant Object? value,
+    ConvertDirection direction,
+  );
 }
 
 /// Serializes / Deserializes dates by a provided
@@ -24,7 +32,10 @@ class JsonDateConverter extends JsonValueConverter {
   final String dateFormat;
 
   @override
-  Object? convert(covariant Object? value) {
+  Object? convert(
+    covariant Object? value,
+    ConvertDirection direction,
+  ) {
     if (value is String) {
       return DateFormat(dateFormat).parse(value);
     } else if (value is DateTime) {
@@ -45,7 +56,10 @@ class JsonTrimString extends JsonValueConverter {
   final bool trimRight;
 
   @override
-  Object? convert(covariant String? value) {
+  Object? convert(
+    covariant String? value,
+    ConvertDirection direction,
+  ) {
     if (!trimLeft && !trimRight) {
       return value;
     }
@@ -85,7 +99,10 @@ class JsonPhoneConverter extends JsonValueConverter {
   });
 
   @override
-  Object? convert(covariant Object? value) {
+  Object? convert(
+    covariant Object? value,
+    ConvertDirection direction,
+  ) {
     if (value is String) {
       if (type == PhoneStringType.formatted) {
         return formatAsPhoneNumber(value);
@@ -118,7 +135,10 @@ class JsonNumConverter extends JsonValueConverter {
   final bool canBeNull;
 
   @override
-  num? convert(covariant num? value) {
+  num? convert(
+    covariant num? value,
+    ConvertDirection direction,
+  ) {
     if (value == null) {
       if (canBeNull) {
         return value;

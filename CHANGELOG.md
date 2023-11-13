@@ -1,3 +1,5 @@
+## 1.2.0
+- Added conversion direction to `JsonValueConvertor`
 ## 1.1.8
 - Removed unnecessary prints
 ## 1.1.7
