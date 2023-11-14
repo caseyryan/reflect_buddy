@@ -304,7 +304,7 @@ extension TypeExtension on Type {
   }
 }
 
-extension _VariableMirrorExtension on VariableMirror {
+extension VariableMirrorExtension on VariableMirror {
   Iterable<T> getAnnotationsOfType<T>() {
     return metadata.map((e) => e.reflectee).whereType<T>();
   }
@@ -354,7 +354,7 @@ extension _VariableMirrorExtension on VariableMirror {
   }
 }
 
-extension _ClassMirrorExtension on ClassMirror {
+extension ClassMirrorExtension on ClassMirror {
   Iterable<T> getAnnotationsOfType<T>() {
     return metadata.map((e) => e.reflectee).whereType<T>();
   }
@@ -428,7 +428,7 @@ extension _ClassMirrorExtension on ClassMirror {
   }
 }
 
-extension _SymbolExtension on Symbol {
+extension SymbolExtension on Symbol {
   /// It's a hack.
   /// The time measure showed that using RegExp for this purpose
   /// (after the RegExp is compiled) takes 2000 - 2100 microseconds

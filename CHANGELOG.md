@@ -1,3 +1,5 @@
+## 1.2.2
+- Made mirror extensions public
 ## 1.2.1
 - Allowed setting unknown value type to `dynamic` fields
 ## 1.2.0
