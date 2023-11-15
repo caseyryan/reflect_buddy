@@ -1,3 +1,5 @@
+## 1.3.1
+- includeParentDeclarationsIfNecessary as extension method on InstanceMirror
 ## 1.3.0
 - Added JsonIncludeParentFields annotation that lets `toJson()` serialize 
 instances including their parent fields

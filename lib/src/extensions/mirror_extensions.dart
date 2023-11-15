@@ -14,30 +14,6 @@ extension JsonEnumExtension on Enum {
   }
 }
 
-/// Just adds parent fields if necessary.
-Map<Symbol, DeclarationMirror> _includeParentDeclarations(
-  InstanceMirror instanceMirror,
-  Map<Symbol, DeclarationMirror> childDeclarations,
-) {
-  ClassMirror? type = instanceMirror.type.superclass;
-  final tempDeclarations = {...childDeclarations};
-  while (type != null) {
-    final declarations = type.declarations.entries.where(
-      (e) => e.value is VariableMirror,
-    );
-    type = type.superclass;
-    final needsToIncludeParent = type?.metadata.any(
-          (e) => e.reflectee.runtimeType == JsonIncludeParentFields,
-        ) ==
-        true;
-    if (!needsToIncludeParent) {
-      type = null;
-    }
-    tempDeclarations.addEntries(declarations);
-  }
-  return tempDeclarations;
-}
-
 extension JsonObjectExtension on Object {
   Object? toInstance<T>() {
     return T.fromJson(this);
@@ -71,14 +47,7 @@ extension JsonObjectExtension on Object {
     }
     final instanceMirror = reflect(this);
 
-    Map<Symbol, DeclarationMirror> declarations =
-        instanceMirror.type.declarations;
-    if (runtimeType.hasAnnotation<JsonIncludeParentFields>()) {
-      declarations = _includeParentDeclarations(
-        instanceMirror,
-        declarations,
-      );
-    }
+    final declarations = instanceMirror.includeParentDeclarationsIfNecessary();
 
     final Map<String, dynamic> json = {};
     JsonKeyNameConverter? classLevelKeyNameConverter =
@@ -158,6 +127,33 @@ extension JsonObjectExtension on Object {
       }
     }
     return json;
+  }
+}
+
+extension InstanceMirrorExtension on InstanceMirror {
+  /// Just adds parent fields if necessary.
+  Map<Symbol, DeclarationMirror> includeParentDeclarationsIfNecessary() {
+    Map<Symbol, DeclarationMirror> childDeclarations = this.type.declarations;
+    ClassMirror? type = this.type.superclass;
+    if (this.type.includeParentFields() == true) {
+      final tempDeclarations = {...childDeclarations};
+      while (type != null) {
+        final declarations = type.declarations.entries.where(
+          (e) => e.value is VariableMirror,
+        );
+        type = type.superclass;
+        final needsToIncludeParent = type?.metadata.any(
+              (e) => e.reflectee.runtimeType == JsonIncludeParentFields,
+            ) ==
+            true;
+        if (!needsToIncludeParent) {
+          type = null;
+        }
+        tempDeclarations.addEntries(declarations);
+      }
+      return tempDeclarations;
+    }
+    return childDeclarations;
   }
 }
 
@@ -404,6 +400,13 @@ extension VariableMirrorExtension on VariableMirror {
 extension ClassMirrorExtension on ClassMirror {
   Iterable<T> getAnnotationsOfType<T>() {
     return metadata.map((e) => e.reflectee).whereType<T>();
+  }
+
+  bool includeParentFields() {
+    return metadata.any(
+          (e) => e.reflectee.runtimeType == JsonIncludeParentFields,
+        ) ==
+        true;
   }
 
   JsonKeyNameConverter? tryGetKeyNameConverter() {
