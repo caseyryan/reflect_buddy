@@ -391,8 +391,7 @@ class PhoneCountryData {
 
   @override
   String toString() {
-    return '[PhoneCountryData(country: $country,' +
-        ' phoneCode: $phoneCode, countryCode: $countryCode)]';
+    return '[PhoneCountryData(country: $country, phoneCode: $phoneCode, countryCode: $countryCode)]';
   }
 }
 

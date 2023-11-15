@@ -1,4 +1,4 @@
-// ignore_for_file: unused_field
+// ignore_for_file: unused_field, unused_element
 
 import 'package:reflect_buddy/reflect_buddy.dart';
 
@@ -9,18 +9,36 @@ enum Gender {
   female,
 }
 
-class Genders {
-  List<Gender>? genders;
-}
-
 void main() {
   /// Just uncomment any example to run it
+  _chainedInheritance();
   // _processSimpleUser();
   // _processSimpleUserWithPrivateId();
   // _processUserWrapperWithCustomDate();
   // _keyNameConversion();
   // _convertKeyNamesByClassAnnotation();
-  _validateContacts();
+  // _validateContacts();
+}
+
+/// This example demonstrates how [JsonIncludeParentFields]
+/// annotation works. The field called `firstName` is declared in a
+/// superclass. But since [Child] is annotated with [JsonIncludeParentFields]
+/// parent fields will also be included
+void _chainedInheritance() {
+  final child = Child()
+    ..age = 5
+    ..firstName = 'Caroline';
+  final json = child.toJson();
+  print(json);
+}
+
+class Parent {
+  String? firstName;
+}
+
+@JsonIncludeParentFields()
+class Child extends Parent {
+  int? age;
 }
 
 /// Applies different contact validators

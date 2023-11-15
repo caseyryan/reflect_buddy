@@ -1,3 +1,6 @@
+## 1.3.0
+- Added JsonIncludeParentFields annotation that lets `toJson()` serialize 
+instances including their parent fields
 ## 1.2.2
 - Made mirror extensions public
 ## 1.2.1

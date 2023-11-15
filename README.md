@@ -45,7 +45,7 @@ Most of the serializers in Dart are written using code builders. This is due to 
 Unlike other serializers, **Reflect Buddy** uses [Just-in-Time](https://en.wikipedia.org/wiki/Just-in-time_compilation) compilation and does not require any pre-built models. Almost any regular class can be serialized/deserialized by calling just one method.
 
 ### Background
-The tool was originally developed as a component of my other project: [Dart Net Core API](https://github.com/caseyryan/dart_net_core_api), also inspired (to some extent) by a C# library calles [Dotnet Core API](https://dotnet.microsoft.com/en-us/apps/aspnet/apis). But, since it may be useful for other developments, I decided to put it in a separate package
+The tool was originally developed as a component of my other project: [Dart Net Core API](https://github.com/caseyryan/dart_net_core_api), also inspired (to some extent) by a C# library called [Dotnet Core API](https://dotnet.microsoft.com/en-us/apps/aspnet/apis). But, since it may be useful for other developments, I decided to put it in a separate package
 
 ### How it works
 Imagine you have some class, for example a User, which contains the typical 
@@ -209,6 +209,28 @@ class SimpleUser {
 }
 
 ```
+
+NOTICE: By default, `toJson()` method only serializes an instance on one level. 
+This means it ignores any superclass fields. But there are some cases where you
+also want to include parent class fields like this. `id`, `createdAt`, `updatedAt` 
+are common fields for all models. There's no need to write them in every model. Just declare them in a superclass and annotate your child class with `@JsonIncludeParentFields()`
+
+```dart
+class BaseModel {
+  int? id;
+  DateTime? createdAt;
+  DateTime? updatedAt;
+}
+
+@JsonIncludeParentFields()
+class User extends BaseModel {
+  int? age;
+  String? firstName;
+  String? lastName;
+}
+```
+
+
 
 ## Validators
 

@@ -14,6 +14,30 @@ extension JsonEnumExtension on Enum {
   }
 }
 
+/// Just adds parent fields if necessary.
+Map<Symbol, DeclarationMirror> _includeParentDeclarations(
+  InstanceMirror instanceMirror,
+  Map<Symbol, DeclarationMirror> childDeclarations,
+) {
+  ClassMirror? type = instanceMirror.type.superclass;
+  final tempDeclarations = {...childDeclarations};
+  while (type != null) {
+    final declarations = type.declarations.entries.where(
+      (e) => e.value is VariableMirror,
+    );
+    type = type.superclass;
+    final needsToIncludeParent = type?.metadata.any(
+          (e) => e.reflectee.runtimeType == JsonIncludeParentFields,
+        ) ==
+        true;
+    if (!needsToIncludeParent) {
+      type = null;
+    }
+    tempDeclarations.addEntries(declarations);
+  }
+  return tempDeclarations;
+}
+
 extension JsonObjectExtension on Object {
   Object? toInstance<T>() {
     return T.fromJson(this);
@@ -46,6 +70,16 @@ extension JsonObjectExtension on Object {
       return (this as Enum).enumToString();
     }
     final instanceMirror = reflect(this);
+
+    Map<Symbol, DeclarationMirror> declarations =
+        instanceMirror.type.declarations;
+    if (runtimeType.hasAnnotation<JsonIncludeParentFields>()) {
+      declarations = _includeParentDeclarations(
+        instanceMirror,
+        declarations,
+      );
+    }
+
     final Map<String, dynamic> json = {};
     JsonKeyNameConverter? classLevelKeyNameConverter =
         instanceMirror.type.tryGetKeyNameConverter();
@@ -54,7 +88,7 @@ extension JsonObjectExtension on Object {
       classLevelKeyNameConverter = null;
     }
     keyNameConverter ??= classLevelKeyNameConverter;
-    for (var kv in instanceMirror.type.declarations.entries) {
+    for (var kv in declarations.entries) {
       if (kv.value is VariableMirror) {
         final variableMirror = kv.value as VariableMirror;
         Object? rawValue = instanceMirror
@@ -78,7 +112,8 @@ extension JsonObjectExtension on Object {
           }
         }
         final alternativeName = variableMirror.alternativeName;
-        final valueConverters = variableMirror.getAnnotationsOfType<JsonValueConverter>();
+        final valueConverters =
+            variableMirror.getAnnotationsOfType<JsonValueConverter>();
         for (final converter in valueConverters) {
           rawValue = converter.convert(
             rawValue,
@@ -134,6 +169,12 @@ extension TypeExtension on Type {
     return classMirror._instantiateUsingDefaultConstructor();
   }
 
+  bool hasAnnotation<T>() {
+    return reflectType(this).metadata.any(
+          (m) => m.reflectee.runtimeType == T,
+        );
+  }
+
   Object? newEnumInstance(Object? value) {
     final classMirror = reflectType(this) as ClassMirror;
     return classMirror._instantiateEnum(value);
@@ -173,11 +214,13 @@ extension TypeExtension on Type {
     } else if (data is List) {
       final reflection = reflectType(this);
       final reflectionClassMirror = (reflection as ClassMirror);
-      final listInstance = reflectionClassMirror._instantiateUsingDefaultConstructor();
+      final listInstance =
+          reflectionClassMirror._instantiateUsingDefaultConstructor();
       if (listInstance is List) {
         for (var rawValue in data) {
           if (reflectionClassMirror.isGeneric) {
-            final actualType = reflectionClassMirror.typeArguments.first.reflectedType;
+            final actualType =
+                reflectionClassMirror.typeArguments.first.reflectedType;
             final actualValue = actualType.fromJson(rawValue);
             listInstance.add(actualValue);
           } else {
@@ -191,7 +234,8 @@ extension TypeExtension on Type {
     } else if (data is Map) {
       final reflection = reflectType(this);
       final reflectionClassMirror = (reflection as ClassMirror);
-      final mapInstance = reflectionClassMirror._instantiateUsingDefaultConstructor();
+      final mapInstance =
+          reflectionClassMirror._instantiateUsingDefaultConstructor();
       if (reflectionClassMirror.isMap) {
         for (var kv in data.entries) {
           final rawKeyData = kv.key;
@@ -219,7 +263,8 @@ extension TypeExtension on Type {
               break;
             }
           }
-          if (declarationMirror != null && declarationMirror is VariableMirror) {
+          if (declarationMirror != null &&
+              declarationMirror is VariableMirror) {
             final VariableMirror variableMirror = declarationMirror;
             if (variableMirror.isConst || variableMirror.isJsonIgnored) {
               continue;
@@ -350,7 +395,9 @@ extension VariableMirrorExtension on VariableMirror {
   }
 
   String? get alternativeName {
-    return getAnnotationsOfType<JsonKey>().firstWhereOrNull((e) => e.name != null)?.name;
+    return getAnnotationsOfType<JsonKey>()
+        .firstWhereOrNull((e) => e.name != null)
+        ?.name;
   }
 }
 
@@ -429,25 +476,7 @@ extension ClassMirrorExtension on ClassMirror {
 }
 
 extension SymbolExtension on Symbol {
-  /// It's a hack.
-  /// The time measure showed that using RegExp for this purpose
-  /// (after the RegExp is compiled) takes 2000 - 2100 microseconds
-  /// or just about 2 milliseconds
-  /// I consider it to be an acceptable value for most cases
-  /// so using reflection would just make the code more complex here
-  static final RegExp _regExp = RegExp(
-    r'(?<=Symbol\(")[a-zA-Z0-9_]+',
-  );
-
   String toName() {
-    final name = toString();
-    final match = _regExp.firstMatch(name);
-    if (match == null) {
-      return '';
-    }
-    return name.substring(
-      match.start,
-      match.end,
-    );
+    return MirrorSystem.getName(this);
   }
 }

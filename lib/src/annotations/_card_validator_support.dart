@@ -141,22 +141,19 @@ class CardSystemData {
   }
   @override
   String toString() {
-    return '[CardSystemData(system: $system,' + ' systemCode: $systemCode]';
+    return '[CardSystemData(system: $system, systemCode: $systemCode]';
   }
 }
 
 class _CardSystemDatas {
-  /// рекурсивно ищет в номере карты код системы, начиная с конца
-  /// нужно для того, чтобы даже после setState и обнуления данных карты
-  /// снова правильно отформатировать ее номер
   static CardSystemData? getCardSystemDataByNumber(
     String cardNumber, {
-    int? subscringLength,
+    int? substringLength,
   }) {
     if (cardNumber.isEmpty) return null;
-    subscringLength = subscringLength ?? cardNumber.length;
+    substringLength = substringLength ?? cardNumber.length;
 
-    if (subscringLength < 1) return null;
+    if (substringLength < 1) return null;
     Map? rawData;
     List<Map> tempSystems = [];
     for (var data in _data) {
