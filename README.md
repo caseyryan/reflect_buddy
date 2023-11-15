@@ -444,6 +444,9 @@ event if the field is private
 - `@SnakeToCamel()`- converts a field name to `camelCaseStyle` 
 - `@FirstToUpper()` - converts a first letter of a field name to upper case
 
+### No category
+- `@JsonIncludeParentFields()` allows `toJson()` also add parent fields
+
 
 ## Writing custom annotations
 
