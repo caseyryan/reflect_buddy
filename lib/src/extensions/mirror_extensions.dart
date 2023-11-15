@@ -76,13 +76,10 @@ extension JsonObjectExtension on Object {
           }
         }
         if (!includeNullValues && rawValue == null) {
-          if (isJsonIncluded == false) {
-            continue;
-          }
+          continue;
         }
         final alternativeName = variableMirror.alternativeName;
-        final valueConverters =
-            variableMirror.getAnnotationsOfType<JsonValueConverter>();
+        final valueConverters = variableMirror.getAnnotationsOfType<JsonValueConverter>();
         for (final converter in valueConverters) {
           rawValue = converter.convert(
             rawValue,
@@ -191,13 +188,11 @@ extension TypeExtension on Type {
       final reflection = reflectType(this);
 
       final reflectionClassMirror = (reflection as ClassMirror);
-      final listInstance =
-          reflectionClassMirror._instantiateUsingDefaultConstructor();
+      final listInstance = reflectionClassMirror._instantiateUsingDefaultConstructor();
       if (listInstance is List) {
         for (var rawValue in data) {
           if (reflectionClassMirror.isGeneric) {
-            final actualType =
-                reflectionClassMirror.typeArguments.first.reflectedType;
+            final actualType = reflectionClassMirror.typeArguments.first.reflectedType;
             final actualValue = actualType.fromJson(rawValue);
             listInstance.add(actualValue);
           } else {
@@ -211,8 +206,7 @@ extension TypeExtension on Type {
     } else if (data is Map) {
       final reflection = reflectType(this);
       final reflectionClassMirror = (reflection as ClassMirror);
-      final mapInstance =
-          reflectionClassMirror._instantiateUsingDefaultConstructor();
+      final mapInstance = reflectionClassMirror._instantiateUsingDefaultConstructor();
       if (reflectionClassMirror.isMap) {
         for (var kv in data.entries) {
           final rawKeyData = kv.key;
@@ -239,10 +233,8 @@ extension TypeExtension on Type {
             /// the name
             String simpleName = declaration.key.toName();
             if (declaration.value is VariableMirror) {
-              final VariableMirror variableMirror =
-                  declaration.value as VariableMirror;
-              final jsonKey =
-                  variableMirror.getAnnotationsOfType<JsonKey>().firstOrNull;
+              final VariableMirror variableMirror = declaration.value as VariableMirror;
+              final jsonKey = variableMirror.getAnnotationsOfType<JsonKey>().firstOrNull;
               if (jsonKey?.name?.isNotEmpty == true) {
                 simpleName = jsonKey!.name!;
               }
@@ -252,8 +244,7 @@ extension TypeExtension on Type {
               break;
             }
           }
-          if (declarationMirror != null &&
-              declarationMirror is VariableMirror) {
+          if (declarationMirror != null && declarationMirror is VariableMirror) {
             final VariableMirror variableMirror = declarationMirror;
             if (variableMirror.isConst || variableMirror.isJsonIgnored) {
               continue;
@@ -384,9 +375,7 @@ extension VariableMirrorExtension on VariableMirror {
   }
 
   String? get alternativeName {
-    return getAnnotationsOfType<JsonKey>()
-        .firstWhereOrNull((e) => e.name != null)
-        ?.name;
+    return getAnnotationsOfType<JsonKey>().firstWhereOrNull((e) => e.name != null)?.name;
   }
 }
 

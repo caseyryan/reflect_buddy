@@ -1,3 +1,5 @@
+## 1.3.4
+- Ignore null values now works correctly even for the fields that are annotated with `JsonInclude()`
 ## 1.3.3
 - `JsonIncludeParentFields` is now also available in `fromJson` direction
 - `JsonKey` is also applied to `fromJson`
