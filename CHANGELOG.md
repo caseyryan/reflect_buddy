@@ -1,3 +1,6 @@
+## 1.3.3
+- `JsonIncludeParentFields` is now also available in `fromJson` direction
+- `JsonKey` is also applied to `fromJson`
 ## 1.3.1
 - includeParentDeclarationsIfNecessary as extension method on InstanceMirror
 ## 1.3.0

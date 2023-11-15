@@ -81,7 +81,8 @@ extension JsonObjectExtension on Object {
           }
         }
         final alternativeName = variableMirror.alternativeName;
-        final valueConverters = variableMirror.getAnnotationsOfType<JsonValueConverter>();
+        final valueConverters =
+            variableMirror.getAnnotationsOfType<JsonValueConverter>();
         for (final converter in valueConverters) {
           rawValue = converter.convert(
             rawValue,
@@ -132,24 +133,7 @@ extension JsonObjectExtension on Object {
 extension InstanceMirrorExtension on InstanceMirror {
   /// Just adds parent fields if necessary.
   Map<Symbol, DeclarationMirror> includeParentDeclarationsIfNecessary() {
-    Map<Symbol, DeclarationMirror> childDeclarations = this.type.declarations;
-    ClassMirror? type = this.type.superclass;
-    if (this.type.includeParentFields() == true) {
-      final tempDeclarations = {...childDeclarations};
-      while (type != null) {
-        final declarations = type.declarations.entries.where(
-          (e) => e.value is VariableMirror,
-        );
-        type = type.superclass;
-        final needsToIncludeParent = type?.includeParentFields() == true;
-        if (!needsToIncludeParent) {
-          type = null;
-        }
-        tempDeclarations.addEntries(declarations);
-      }
-      return tempDeclarations;
-    }
-    return childDeclarations;
+    return type.includeParentDeclarationsIfNecessary();
   }
 }
 
@@ -205,12 +189,15 @@ extension TypeExtension on Type {
       return data;
     } else if (data is List) {
       final reflection = reflectType(this);
+
       final reflectionClassMirror = (reflection as ClassMirror);
-      final listInstance = reflectionClassMirror._instantiateUsingDefaultConstructor();
+      final listInstance =
+          reflectionClassMirror._instantiateUsingDefaultConstructor();
       if (listInstance is List) {
         for (var rawValue in data) {
           if (reflectionClassMirror.isGeneric) {
-            final actualType = reflectionClassMirror.typeArguments.first.reflectedType;
+            final actualType =
+                reflectionClassMirror.typeArguments.first.reflectedType;
             final actualValue = actualType.fromJson(rawValue);
             listInstance.add(actualValue);
           } else {
@@ -224,7 +211,8 @@ extension TypeExtension on Type {
     } else if (data is Map) {
       final reflection = reflectType(this);
       final reflectionClassMirror = (reflection as ClassMirror);
-      final mapInstance = reflectionClassMirror._instantiateUsingDefaultConstructor();
+      final mapInstance =
+          reflectionClassMirror._instantiateUsingDefaultConstructor();
       if (reflectionClassMirror.isMap) {
         for (var kv in data.entries) {
           final rawKeyData = kv.key;
@@ -240,19 +228,32 @@ extension TypeExtension on Type {
         final instanceMirror = reflect(mapInstance);
         for (var kv in data.entries) {
           DeclarationMirror? declarationMirror;
-          for (var declaration in reflectionClassMirror.declarations.entries) {
+          final declarations =
+              reflectionClassMirror.includeParentDeclarationsIfNecessary();
+
+          for (var declaration in declarations.entries) {
             /// this hack is needed to be able to access private fields
             /// simply calling reflectionClassMirror.declarations[Symbol(kv.key)]; won't work
             /// in this case since private keys have unique namings based on their hash
             /// toName() extension doesn't care for that, it uses a RegExp to parse
             /// the name
-            final simpleName = declaration.key.toName();
+            String simpleName = declaration.key.toName();
+            if (declaration.value is VariableMirror) {
+              final VariableMirror variableMirror =
+                  declaration.value as VariableMirror;
+              final jsonKey =
+                  variableMirror.getAnnotationsOfType<JsonKey>().firstOrNull;
+              if (jsonKey?.name?.isNotEmpty == true) {
+                simpleName = jsonKey!.name!;
+              }
+            }
             if (simpleName == kv.key) {
               declarationMirror = declaration.value;
               break;
             }
           }
-          if (declarationMirror != null && declarationMirror is VariableMirror) {
+          if (declarationMirror != null &&
+              declarationMirror is VariableMirror) {
             final VariableMirror variableMirror = declarationMirror;
             if (variableMirror.isConst || variableMirror.isJsonIgnored) {
               continue;
@@ -383,7 +384,9 @@ extension VariableMirrorExtension on VariableMirror {
   }
 
   String? get alternativeName {
-    return getAnnotationsOfType<JsonKey>().firstWhereOrNull((e) => e.name != null)?.name;
+    return getAnnotationsOfType<JsonKey>()
+        .firstWhereOrNull((e) => e.name != null)
+        ?.name;
   }
 }
 
@@ -397,6 +400,27 @@ extension ClassMirrorExtension on ClassMirror {
           (e) => e.reflectee.runtimeType == JsonIncludeParentFields,
         ) ==
         true;
+  }
+
+  Map<Symbol, DeclarationMirror> includeParentDeclarationsIfNecessary() {
+    Map<Symbol, DeclarationMirror> childDeclarations = declarations;
+    ClassMirror? type = superclass;
+    if (includeParentFields() == true) {
+      final tempDeclarations = {...childDeclarations};
+      while (type != null) {
+        final declarations = type.declarations.entries.where(
+          (e) => e.value is VariableMirror,
+        );
+        type = type.superclass;
+        final needsToIncludeParent = type?.includeParentFields() == true;
+        if (!needsToIncludeParent) {
+          type = null;
+        }
+        tempDeclarations.addEntries(declarations);
+      }
+      return tempDeclarations;
+    }
+    return childDeclarations;
   }
 
   JsonKeyNameConverter? tryGetKeyNameConverter() {
