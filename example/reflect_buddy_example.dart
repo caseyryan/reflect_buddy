@@ -10,8 +10,7 @@ enum Gender {
 }
 
 void main() {
-
-
+  
   /// Just uncomment any example to run it
   _chainedInheritance();
   // _processSimpleUser();

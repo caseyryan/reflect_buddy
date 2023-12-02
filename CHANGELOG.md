@@ -1,3 +1,5 @@
+## 1.3.5
+- List toJson now also returns List
 ## 1.3.4
 - Ignore null values now works correctly even for the fields that are annotated with `JsonInclude()`
 ## 1.3.3

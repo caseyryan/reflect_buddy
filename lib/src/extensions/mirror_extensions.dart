@@ -44,6 +44,11 @@ extension JsonObjectExtension on Object {
       return newMap;
     } else if (this is Enum) {
       return (this as Enum).enumToString();
+    } else if (this is List) {
+      return (this as List).map((e) => (e as Object).toJson(
+        includeNullValues: includeNullValues,
+        keyNameConverter: keyNameConverter,
+      ),).toList();
     }
     final instanceMirror = reflect(this);
 
