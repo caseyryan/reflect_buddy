@@ -59,7 +59,8 @@ extension JsonObjectExtension on Object {
     final declarations = instanceMirror.includeParentDeclarationsIfNecessary();
 
     final Map<String, dynamic> json = {};
-    JsonKeyNameConverter? classLevelKeyNameConverter = instanceMirror.type.tryGetKeyNameConverter();
+    JsonKeyNameConverter? classLevelKeyNameConverter =
+        instanceMirror.type.tryGetKeyNameConverter();
     if (classLevelKeyNameConverter != null && keyNameConverter != null) {
       /// if you pass a keyNameConverter, it will override the existing annotation of the same type
       classLevelKeyNameConverter = null;
@@ -87,7 +88,8 @@ extension JsonObjectExtension on Object {
           continue;
         }
         final alternativeName = variableMirror.alternativeName;
-        final valueConverters = variableMirror.getAnnotationsOfType<JsonValueConverter>();
+        final valueConverters =
+            variableMirror.getAnnotationsOfType<JsonValueConverter>();
         for (final converter in valueConverters) {
           rawValue = converter.convert(
             rawValue,
@@ -196,11 +198,13 @@ extension TypeExtension on Type {
       final reflection = reflectType(this);
 
       final reflectionClassMirror = (reflection as ClassMirror);
-      final listInstance = reflectionClassMirror._instantiateUsingDefaultConstructor();
+      final listInstance =
+          reflectionClassMirror._instantiateUsingDefaultConstructor();
       if (listInstance is List) {
         for (var rawValue in data) {
           if (reflectionClassMirror.isGeneric) {
-            final actualType = reflectionClassMirror.typeArguments.first.reflectedType;
+            final actualType =
+                reflectionClassMirror.typeArguments.first.reflectedType;
             final actualValue = actualType.fromJson(rawValue);
             listInstance.add(actualValue);
           } else {
@@ -214,7 +218,8 @@ extension TypeExtension on Type {
     } else if (data is Map) {
       final reflection = reflectType(this);
       final reflectionClassMirror = (reflection as ClassMirror);
-      final mapInstance = reflectionClassMirror._instantiateUsingDefaultConstructor();
+      final mapInstance =
+          reflectionClassMirror._instantiateUsingDefaultConstructor();
       if (reflectionClassMirror.isMap) {
         for (var kv in data.entries) {
           final rawKeyData = kv.key;
@@ -230,7 +235,8 @@ extension TypeExtension on Type {
         final instanceMirror = reflect(mapInstance);
         for (var kv in data.entries) {
           DeclarationMirror? declarationMirror;
-          final declarations = reflectionClassMirror.includeParentDeclarationsIfNecessary();
+          final declarations =
+              reflectionClassMirror.includeParentDeclarationsIfNecessary();
 
           for (var declaration in declarations.entries) {
             /// this hack is needed to be able to access private fields
@@ -240,8 +246,10 @@ extension TypeExtension on Type {
             /// the name
             String simpleName = declaration.key.toName();
             if (declaration.value is VariableMirror) {
-              final VariableMirror variableMirror = declaration.value as VariableMirror;
-              final jsonKey = variableMirror.getAnnotationsOfType<JsonKey>().firstOrNull;
+              final VariableMirror variableMirror =
+                  declaration.value as VariableMirror;
+              final jsonKey =
+                  variableMirror.getAnnotationsOfType<JsonKey>().firstOrNull;
               if (jsonKey?.name?.isNotEmpty == true) {
                 simpleName = jsonKey!.name!;
               }
@@ -251,13 +259,16 @@ extension TypeExtension on Type {
               break;
             }
           }
-          if (declarationMirror != null && declarationMirror is VariableMirror) {
+          if (declarationMirror != null &&
+              declarationMirror is VariableMirror) {
             final VariableMirror variableMirror = declarationMirror;
-            if (variableMirror.isConst || variableMirror.isJsonIgnored(SerializationDirection.fromJson)) {
+            if (variableMirror.isConst ||
+                variableMirror.isJsonIgnored(SerializationDirection.fromJson)) {
               continue;
             }
             if (variableMirror.isPrivate) {
-              if (!variableMirror.isJsonIncluded(SerializationDirection.fromJson)) {
+              if (!variableMirror
+                  .isJsonIncluded(SerializationDirection.fromJson)) {
                 continue;
               }
             }
@@ -268,7 +279,8 @@ extension TypeExtension on Type {
                   : variableClassMirror.runtimeType;
               final isEnum = variableClassMirror.isEnum;
 
-              final valueConverters = variableMirror.getAnnotationsOfType<JsonValueConverter>();
+              final valueConverters =
+                  variableMirror.getAnnotationsOfType<JsonValueConverter>();
               var value = kv.value;
 
               for (final converter in valueConverters) {
@@ -283,7 +295,8 @@ extension TypeExtension on Type {
 
               value = fieldType.fromJson(value);
 
-              final valueValidators = variableMirror.getAnnotationsOfType<JsonValueValidator>();
+              final valueValidators =
+                  variableMirror.getAnnotationsOfType<JsonValueValidator>();
               final variableName = variableMirror.simpleName.toName();
               for (final validator in valueValidators) {
                 validator.validate(
@@ -390,7 +403,9 @@ extension VariableMirrorExtension on VariableMirror {
   }
 
   String? get alternativeName {
-    return getAnnotationsOfType<JsonKey>().firstWhereOrNull((e) => e.name != null)?.name;
+    return getAnnotationsOfType<JsonKey>()
+        .firstWhereOrNull((e) => e.name != null)
+        ?.name;
   }
 }
 
@@ -487,7 +502,8 @@ extension ClassMirrorExtension on ClassMirror {
   }
 
   bool get isList {
-    return qualifiedName == const Symbol('dart.core.List') || qualifiedName == const Symbol('dart.core.GrowableList');
+    return qualifiedName == const Symbol('dart.core.List') ||
+        qualifiedName == const Symbol('dart.core.GrowableList');
   }
 
   bool get isMap {

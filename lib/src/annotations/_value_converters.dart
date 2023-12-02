@@ -5,9 +5,6 @@ enum SerializationDirection {
   toJson,
 }
 
-
-
-
 /// Similar to [JsonValueValidator] but it must not
 /// throw any exceptions but convert a value instead
 /// For example: you get 101 from your json map, but an

@@ -71,7 +71,8 @@ class JsonKey {
     if (ignoreDirections.isNotEmpty && includeDirections.isNotEmpty) {
       if (ignoreDirections.length > 1 && includeDirections.length > 1) {
         throw error;
-      } else if (ignoreDirections.length == 1 && includeDirections.length == 1) {
+      } else if (ignoreDirections.length == 1 &&
+          includeDirections.length == 1) {
         if (ignoreDirections.first == includeDirections.first) {
           throw error;
         }
