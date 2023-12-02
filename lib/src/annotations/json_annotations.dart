@@ -21,23 +21,31 @@ class JsonIncludeParentFields {
 }
 
 class JsonInclude extends JsonKey {
-  const JsonInclude()
-      : super(
-          isIgnored: false,
-          isIncluded: true,
+  const JsonInclude({
+    List<SerializationDirection> includeDirections = const [
+      SerializationDirection.fromJson,
+      SerializationDirection.toJson,
+    ],
+  }) : super(
+          ignoreDirections: const [],
+          includeDirections: includeDirections,
         );
 }
 
 class JsonIgnore extends JsonKey {
-  const JsonIgnore()
-      : super(
-          isIgnored: true,
-          isIncluded: false,
+  const JsonIgnore({
+    List<SerializationDirection> ignoreDirections = const [
+      SerializationDirection.fromJson,
+      SerializationDirection.toJson,
+    ],
+  }) : super(
+          includeDirections: const [],
+          ignoreDirections: ignoreDirections,
         );
 }
 
-/// [isIgnored] means this field will be ignored from a
-/// deserialized json even if it's public
+/// [ignoreDirections] contains a list of directions which will be ignored
+/// [includeDirections] contains a list of directions which will be included
 ///
 /// [isIncluded] makes sense only for private fields if you
 /// want them to be included to a resulting JSON. By default
@@ -47,12 +55,27 @@ class JsonIgnore extends JsonKey {
 /// one in a resulting JSON, just type this alternative name here
 class JsonKey {
   const JsonKey({
-    this.isIgnored = false,
-    this.isIncluded = true,
+    required this.ignoreDirections,
+    required this.includeDirections,
     this.name,
-  }) : assert(isIgnored != isIncluded);
+  });
 
-  final bool isIgnored;
-  final bool isIncluded;
+  final List<SerializationDirection> ignoreDirections;
+  final List<SerializationDirection> includeDirections;
+
   final String? name;
+
+  void checkIfValid() {
+    const error =
+        'You can\'t use both `ignoreDirections` and `ignoreDirections` at the same time with all values. The lists must be completely different';
+    if (ignoreDirections.isNotEmpty && includeDirections.isNotEmpty) {
+      if (ignoreDirections.length > 1 && includeDirections.length > 1) {
+        throw error;
+      } else if (ignoreDirections.length == 1 && includeDirections.length == 1) {
+        if (ignoreDirections.first == includeDirections.first) {
+          throw error;
+        }
+      }
+    }
+  }
 }

@@ -1,3 +1,5 @@
+## 1.4.0
+- JsonIgnore and JsonInclude now can have a direction
 ## 1.3.5
 - List toJson now also returns List
 ## 1.3.4

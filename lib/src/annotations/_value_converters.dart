@@ -1,9 +1,12 @@
 part of 'json_annotations.dart';
 
-enum ConvertDirection {
+enum SerializationDirection {
   fromJson,
   toJson,
 }
+
+
+
 
 /// Similar to [JsonValueValidator] but it must not
 /// throw any exceptions but convert a value instead
@@ -19,7 +22,7 @@ abstract class JsonValueConverter {
 
   Object? convert(
     covariant Object? value,
-    ConvertDirection direction,
+    SerializationDirection direction,
   );
 }
 
@@ -34,7 +37,7 @@ class JsonDateConverter extends JsonValueConverter {
   @override
   Object? convert(
     covariant Object? value,
-    ConvertDirection direction,
+    SerializationDirection direction,
   ) {
     if (value is String) {
       return DateFormat(dateFormat).parse(value);
@@ -58,7 +61,7 @@ class JsonTrimString extends JsonValueConverter {
   @override
   Object? convert(
     covariant String? value,
-    ConvertDirection direction,
+    SerializationDirection direction,
   ) {
     if (!trimLeft && !trimRight) {
       return value;
@@ -101,7 +104,7 @@ class JsonPhoneConverter extends JsonValueConverter {
   @override
   Object? convert(
     covariant Object? value,
-    ConvertDirection direction,
+    SerializationDirection direction,
   ) {
     if (value is String) {
       if (type == PhoneStringType.formatted) {
@@ -137,7 +140,7 @@ class JsonNumConverter extends JsonValueConverter {
   @override
   num? convert(
     covariant num? value,
-    ConvertDirection direction,
+    SerializationDirection direction,
   ) {
     if (value == null) {
       if (canBeNull) {
