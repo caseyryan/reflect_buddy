@@ -330,16 +330,18 @@ extension TypeExtension on Type {
       /// This might be the case when an Enum is expected
       /// but a string is passed, for example
       final reflection = reflectType(this);
-      final reflectionClassMirror = (reflection as ClassMirror);
-      final isEnum = reflectionClassMirror.isEnum;
-      if (isEnum && data is! Enum) {
-        return reflectionClassMirror.reflectedType.newEnumInstance(data);
-      } else {
-        throw '''
+      if (reflection is ClassMirror) {
+        final reflectionClassMirror = reflection;
+        final isEnum = reflectionClassMirror.isEnum;
+        if (isEnum && data is! Enum) {
+          return reflectionClassMirror.reflectedType.newEnumInstance(data);
+        } else {
+          throw '''
           Value is unsupported. Please report this case: https://github.com/caseyryan/reflect_buddy/issues
           Expected value type: ${reflectionClassMirror.reflectedType}
           Actual value: $data
         ''';
+        }
       }
     }
 

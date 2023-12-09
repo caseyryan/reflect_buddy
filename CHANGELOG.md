@@ -1,3 +1,5 @@
+## 1.4.1
+- Added support for a dynamic Map
 ## 1.4.0
 - JsonIgnore and JsonInclude now can have a direction
 ## 1.3.5
