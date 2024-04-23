@@ -1,3 +1,5 @@
+## 1.4.2
+- Fixed incorrect logic for field comparison
 ## 1.4.1
 - Added support for a dynamic Map
 ## 1.4.0

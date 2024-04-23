@@ -233,34 +233,34 @@ extension TypeExtension on Type {
         return mapInstance;
       } else {
         final instanceMirror = reflect(mapInstance);
-        for (var kv in data.entries) {
-          DeclarationMirror? declarationMirror;
-          final declarations =
-              reflectionClassMirror.includeParentDeclarationsIfNecessary();
 
-          for (var declaration in declarations.entries) {
-            /// this hack is needed to be able to access private fields
-            /// simply calling reflectionClassMirror.declarations[Symbol(kv.key)]; won't work
-            /// in this case since private keys have unique namings based on their hash
-            /// toName() extension doesn't care for that, it uses a RegExp to parse
-            /// the name
-            String simpleName = declaration.key.toName();
-            if (declaration.value is VariableMirror) {
-              final VariableMirror variableMirror =
-                  declaration.value as VariableMirror;
-              final jsonKey =
-                  variableMirror.getAnnotationsOfType<JsonKey>().firstOrNull;
-              if (jsonKey?.name?.isNotEmpty == true) {
-                simpleName = jsonKey!.name!;
-              }
-            }
-            if (simpleName == kv.key) {
-              declarationMirror = declaration.value;
-              break;
+        final declarations =
+            reflectionClassMirror.includeParentDeclarationsIfNecessary();
+        for (var declaration in declarations.entries) {
+          DeclarationMirror? declarationMirror;
+
+          /// this hack is needed to be able to access private fields
+          /// simply calling reflectionClassMirror.declarations[Symbol(kv.key)]; won't work
+          /// in this case since private keys have unique namings based on their hash
+          /// toName() extension doesn't care for that, it uses a RegExp to parse
+          /// the name
+          String simpleName = declaration.key.toName();
+          if (declaration.value is VariableMirror) {
+            final VariableMirror variableMirror =
+                declaration.value as VariableMirror;
+            final jsonKey =
+                variableMirror.getAnnotationsOfType<JsonKey>().firstOrNull;
+            if (jsonKey?.name?.isNotEmpty == true) {
+              simpleName = jsonKey!.name!;
             }
           }
-          if (declarationMirror != null &&
-              declarationMirror is VariableMirror) {
+          declarationMirror = declaration.value;
+          dynamic valueFromJson;
+
+          /// Trying to get the value for it from json map
+          valueFromJson = data[simpleName];
+
+          if (declarationMirror is VariableMirror) {
             final VariableMirror variableMirror = declarationMirror;
             if (variableMirror.isConst ||
                 variableMirror.isJsonIgnored(SerializationDirection.fromJson)) {
@@ -281,7 +281,7 @@ extension TypeExtension on Type {
 
               final valueConverters =
                   variableMirror.getAnnotationsOfType<JsonValueConverter>();
-              var value = kv.value;
+              var value = valueFromJson;
 
               for (final converter in valueConverters) {
                 value = converter.convert(
@@ -319,11 +319,15 @@ extension TypeExtension on Type {
               /// value is expected since it might just not work
               instanceMirror.setField(
                 variableMirror.simpleName,
-                kv.value,
+                valueFromJson,
               );
             }
+          } else {
+            // passed some key that is not present in the model
+            // print('no mirror $valueFromJson');
           }
         }
+
         return mapInstance;
       }
     } else {

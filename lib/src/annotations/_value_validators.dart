@@ -38,6 +38,22 @@ abstract class JsonValueValidator {
   });
 }
 
+class RequiredValidator extends JsonValueValidator {
+  const RequiredValidator() : super(canBeNull: false);
+
+  @override
+  void validate({
+    covariant Object? actualValue,
+    required String fieldName,
+  }) {
+    checkForNull(
+      canBeNull: canBeNull,
+      fieldName: fieldName,
+      actualValue: actualValue,
+    );
+  }
+}
+
 class IntValidator extends NumValidator {
   const IntValidator({
     required int minValue,
