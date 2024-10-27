@@ -1,3 +1,5 @@
+## 1.5.2
+- Correct processing of default values for fields
 ## 1.5.1
 - A quick hotfix for a bug that was introduced in 1.5.0 which failed the parsing if a class didn't have toJson method
 ## 1.5.0

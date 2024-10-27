@@ -20,7 +20,18 @@ void main() {
   // _keyNameConversion();
   // _convertKeyNamesByClassAnnotation();
   // _validateContacts();
-  _processJsonSerializable();
+  // _processJsonSerializable();
+  _tryIgnoreDefaultValues();
+}
+
+void _tryIgnoreDefaultValues() {
+  final emptyMap = {};
+  final defaulted = fromJson<Defaulted>(emptyMap);
+  print(defaulted);
+}
+
+class Defaulted {
+  bool name = true;
 }
 
 void _processJsonSerializable() {

@@ -354,10 +354,18 @@ extension TypeExtension on Type {
                   actualValue: value,
                 );
               }
-              instanceMirror.setField(
-                variableMirror.simpleName,
-                value,
-              );
+              try {
+                instanceMirror.setField(
+                  variableMirror.simpleName,
+                  value ??
+                      instanceMirror
+                          .getField(variableMirror.simpleName)
+                          .reflectee,
+                );
+              } catch (_) {
+                /// this exception is suppressed to avoid setting
+                /// unwanted types
+              }
             } else if (variableMirror.type.reflectedType.isDynamic) {
               /// This is the most dangerous situation. You SHOULD
               /// always try to avoid
@@ -367,10 +375,18 @@ extension TypeExtension on Type {
               /// be an acceptable value.
               /// And of course, never try to use `dynamic` where some non-primitive
               /// value is expected since it might just not work
-              instanceMirror.setField(
-                variableMirror.simpleName,
-                valueFromJson,
-              );
+              try {
+                instanceMirror.setField(
+                  variableMirror.simpleName,
+                  valueFromJson ??
+                      instanceMirror
+                          .getField(variableMirror.simpleName)
+                          .reflectee,
+                );
+              } catch (_) {
+                /// this exception is suppressed to avoid setting
+                /// unwanted types
+              }
             }
           } else {
             // passed some key that is not present in the model
