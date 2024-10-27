@@ -26,15 +26,18 @@ void main() {
 void _processJsonSerializable() {
   final map = {
     'age': 37,
-    'name': 'Konstantin', 
+    'name': 'Konstantin',
     'hobbies': ['reading', 'running']
-  };  
-  /// it is intentionally called this way to first call 
+  };
+
+  /// it is intentionally called this way to first call
   /// the fromJson method built into the reflect_buddy.
   /// But it will still find the fromJson method of the json_serializable
   /// class and call it internally
   final human = (HumanJsonSerializable).fromJson(map);
   print(human);
+  final json = human?.toJson();
+  print(json);
 }
 
 /// This example demonstrates how [JsonIncludeParentFields]

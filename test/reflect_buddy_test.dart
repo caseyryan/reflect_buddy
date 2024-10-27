@@ -5,7 +5,7 @@ void main() {
   group('A group of tests', () {
     final Human? human = {
       'age': 37,
-      'name': 'Konstantin', 
+      'name': 'Konstantin',
       'hobbies': ['reading', 'running']
     }.fromJson<Human>() as Human?;
     assert(human != null);
@@ -14,9 +14,7 @@ void main() {
     assert(human!.hobbies?.length == 2);
     assert(human!.hobbies!.contains('reading'));
   });
-
 }
-
 
 class Human {
   int? age;

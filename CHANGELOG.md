@@ -1,3 +1,6 @@
+## 1.5.0
+- Added native support for json_serializable fromJson / toJson methods. Besides that it also supports fromMap / toMap methods. If either of these is present in a class or an instance, it will call it instead of reflecting the fields
+IMPORTANT! no `reflect_buddy` annotations will work in this case
 ## 1.4.2
 - Fixed incorrect logic for field comparison
 ## 1.4.1
