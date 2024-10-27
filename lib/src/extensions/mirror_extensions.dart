@@ -61,10 +61,10 @@ extension JsonObjectExtension on Object {
     /// instead of mirroring the fields
     const possibleSerializers = ['toJson', 'toMap'];
     for (var possibleSerializer in possibleSerializers) {
-      final serializerReflectee = instanceMirror.invoke(
-        Symbol(possibleSerializer),
-        [],
-      ).reflectee;
+      final serializerReflectee = instanceMirror.tryCallMethod(
+        methodName: possibleSerializer,
+        positionalArguments: [],
+      );
       if (serializerReflectee != null) {
         return serializerReflectee;
       }
@@ -155,6 +155,23 @@ extension InstanceMirrorExtension on InstanceMirror {
   /// Just adds parent fields if necessary.
   Map<Symbol, DeclarationMirror> includeParentDeclarationsIfNecessary() {
     return type.includeParentDeclarationsIfNecessary();
+  }
+
+  Object? tryCallMethod({
+    required String methodName,
+    List<Object?> positionalArguments = const [],
+    Map<Symbol, Object?> namedArguments = const {},
+  }) {
+    final symbolName = Symbol(methodName);
+    final classMirror = reflectClass(type.reflectedType);
+    if (classMirror.declarations.containsKey(symbolName)) {
+      return invoke(
+        symbolName,
+        positionalArguments,
+        namedArguments,
+      ).reflectee;
+    }
+    return null;
   }
 }
 

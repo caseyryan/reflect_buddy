@@ -1,3 +1,5 @@
+## 1.5.1
+- A quick hotfix for a bug that was introduced in 1.5.0 which failed the parsing if a class didn't have toJson method
 ## 1.5.0
 - Added native support for json_serializable fromJson / toJson methods. Besides that it also supports fromMap / toMap methods. If either of these is present in a class or an instance, it will call it instead of reflecting the fields
 IMPORTANT! no `reflect_buddy` annotations will work in this case
