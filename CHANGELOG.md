@@ -1,3 +1,8 @@
+## 1.5.4
+- Added onKeyConversion: (ConvertedKey result) {} callback to both `toJson` and `fromJson` methods
+- Added tryUseNativeSerializerMethodsIfAny: true to both `toJson` and `fromJson` methods
+- A reverse conversion of keys is now possible for default converters `CamelToSnake` and `SnakeToCamel`
+It's not guaranteed to work 100% perfectly son use it with caution
 ## 1.5.2
 - Correct processing of default values for fields
 ## 1.5.1

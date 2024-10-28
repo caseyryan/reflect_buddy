@@ -2,10 +2,46 @@ import 'dart:mirrors';
 
 // ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
-import 'package:reflect_buddy/src/annotations/json_annotations.dart';
+import 'package:reflect_buddy/reflect_buddy.dart';
 
-Object? fromJson<T>(Object? data) {
-  return T.fromJson(data);
+/// used with [OnKeyConversion] and is there
+/// to return the result of the key conversion
+/// for example if you use toJson method and pass [OnKeyConversion]
+/// callback you will get the conversion result for every key
+/// e.g oldKey: userFirstName, newKey: user_first_name
+/// if CamelToSnake() was used
+class ConvertedKey {
+  final String oldKey;
+  final String newKey;
+  ConvertedKey({
+    required this.oldKey,
+    required this.newKey,
+  });
+
+  @override
+  String toString() {
+    return 'Instance of ConvertedKey [oldKey: $oldKey, newKey: $newKey]';
+  }
+}
+
+typedef OnKeyConversion = Function(ConvertedKey);
+
+/// [onKeyConversion] is a callback that will be called
+/// for every key that is being converted. It is useful
+/// for logging purposes or for other purposes like creating a database indices
+/// to understand what key was converted to what
+Object? fromJson<T>(
+  Object? data, {
+  OnKeyConversion? onKeyConversion,
+  bool tryUseNativeSerializerMethodsIfAny = true,
+  bool tryApplyReversedKeyConversion = true,
+}) {
+  return T.fromJson(
+    data,
+    onKeyConversion: onKeyConversion,
+    tryApplyReversedKeyConversion: tryApplyReversedKeyConversion,
+    tryUseNativeSerializerMethodsIfAny: tryUseNativeSerializerMethodsIfAny,
+  );
 }
 
 extension JsonEnumExtension on Enum {
@@ -26,9 +62,19 @@ extension JsonObjectExtension on Object {
   /// If you want to skip the unset values just pass false
   /// [keyNameConverter] if you need to apply some conversion
   /// on the resulting JSON key names, pass a converter here.
+  /// [onKeyConversion] is a callback that will be called
+  /// for every key that is being converted. It is useful
+  /// for logging purposes or for other purposes like creating a database indices
+  /// to understand what key was converted to what
+  /// [tryUseNativeSerializerMethodsIfAny] whether or not
+  /// to use the native toJson / toMap methods if any
+  /// e.g. in case it's a json_serializable model
+  /// if any of these methods is present it will be used
   Object? toJson({
     bool includeNullValues = false,
+    bool tryUseNativeSerializerMethodsIfAny = true,
     JsonKeyNameConverter? keyNameConverter,
+    OnKeyConversion? onKeyConversion,
   }) {
     if (runtimeType.isPrimitive) {
       return this;
@@ -56,25 +102,26 @@ extension JsonObjectExtension on Object {
     }
     final instanceMirror = reflect(this);
 
-    /// if it's a json_serializable class (or similar),
-    /// it will try to call its native toJson / toMap method
-    /// instead of mirroring the fields
-    const possibleSerializers = ['toJson', 'toMap'];
-    for (var possibleSerializer in possibleSerializers) {
-      final serializerReflectee = instanceMirror.tryCallMethod(
-        methodName: possibleSerializer,
-        positionalArguments: [],
-      );
-      if (serializerReflectee != null) {
-        return serializerReflectee;
+    if (tryUseNativeSerializerMethodsIfAny) {
+      /// if it's a json_serializable class (or similar),
+      /// it will try to call its native toJson / toMap method
+      /// instead of mirroring the fields
+      const possibleSerializers = ['toJson', 'toMap'];
+      for (var possibleSerializer in possibleSerializers) {
+        final serializerReflectee = instanceMirror.tryCallMethod(
+          methodName: possibleSerializer,
+          positionalArguments: [],
+        );
+        if (serializerReflectee != null) {
+          return serializerReflectee;
+        }
       }
     }
 
     final declarations = instanceMirror.includeParentDeclarationsIfNecessary();
 
     final Map<String, dynamic> json = {};
-    JsonKeyNameConverter? classLevelKeyNameConverter =
-        instanceMirror.type.tryGetKeyNameConverter();
+    JsonKeyNameConverter? classLevelKeyNameConverter = instanceMirror.type.tryGetKeyNameConverter();
     if (classLevelKeyNameConverter != null && keyNameConverter != null) {
       /// if you pass a keyNameConverter, it will override the existing annotation of the same type
       classLevelKeyNameConverter = null;
@@ -102,8 +149,7 @@ extension JsonObjectExtension on Object {
           continue;
         }
         final alternativeName = variableMirror.alternativeName;
-        final valueConverters =
-            variableMirror.getAnnotationsOfType<JsonValueConverter>();
+        final valueConverters = variableMirror.getAnnotationsOfType<JsonValueConverter>();
         for (final converter in valueConverters) {
           rawValue = converter.convert(
             rawValue,
@@ -138,11 +184,25 @@ extension JsonObjectExtension on Object {
         } else {
           value = rawValue?.toJson();
         }
+        String? oldKey;
+        String? newKey;
+        if (onKeyConversion != null) {
+          oldKey = variableMirror.name;
+        }
         final variableName = alternativeName ??
             variableMirror.tryConvertVariableNameViaAnnotation(
               variableName: variableMirror.name,
               keyNameConverter: keyNameConverter,
             );
+        if (oldKey != null) {
+          newKey = variableName;
+          onKeyConversion!(
+            ConvertedKey(
+              oldKey: oldKey,
+              newKey: newKey,
+            ),
+          );
+        }
 
         json[variableName] = value;
       }
@@ -214,7 +274,22 @@ extension TypeExtension on Type {
     return this == DateTime;
   }
 
-  Object? fromJson(Object? data) {
+  /// [tryUseNativeSerializerMethodsIfAny] whether or not
+  /// to use the native fromJson / fromMap methods if any
+  /// e.g. in case it's a json_serializable model
+  /// if any of these methods is present it will be used
+  /// [tryApplyReversedKeyConversion] if true it will try to apply reversed key conversion
+  /// e.g. if there's a CamelToSnake converter applied to a field or a class
+  /// and the current value is determined as a snake case then it will try to convert it back to camel case
+  /// it might not work 100% perfectly so use it with caution.
+  /// It's more reliable to apply [JsonKey] with a particular field name to a required field
+  /// in this case it will be used instead and [tryApplyReversedKeyConversion] will be ignored
+  Object? fromJson(
+    Object? data, {
+    OnKeyConversion? onKeyConversion,
+    bool tryUseNativeSerializerMethodsIfAny = true,
+    bool tryApplyReversedKeyConversion = true,
+  }) {
     if (data == null) {
       return null;
     } else if (this == data.runtimeType) {
@@ -229,13 +304,12 @@ extension TypeExtension on Type {
       final reflection = reflectType(this);
 
       final reflectionClassMirror = (reflection as ClassMirror);
-      final listInstance =
-          reflectionClassMirror._instantiateUsingDefaultConstructor();
+
+      final listInstance = reflectionClassMirror._instantiateUsingDefaultConstructor();
       if (listInstance is List) {
         for (var rawValue in data) {
           if (reflectionClassMirror.isGeneric) {
-            final actualType =
-                reflectionClassMirror.typeArguments.first.reflectedType;
+            final actualType = reflectionClassMirror.typeArguments.first.reflectedType;
             final actualValue = actualType.fromJson(rawValue);
             listInstance.add(actualValue);
           } else {
@@ -249,8 +323,7 @@ extension TypeExtension on Type {
     } else if (data is Map) {
       final reflection = reflectType(this);
       final reflectionClassMirror = (reflection as ClassMirror);
-      final mapInstance =
-          reflectionClassMirror._instantiateUsingDefaultConstructor();
+      final mapInstance = reflectionClassMirror._instantiateUsingDefaultConstructor();
       if (reflectionClassMirror.isMap) {
         for (var kv in data.entries) {
           final rawKeyData = kv.key;
@@ -265,29 +338,35 @@ extension TypeExtension on Type {
       } else {
         final instanceMirror = reflect(mapInstance);
 
-        /// this is required to process json_serializable classes
-        /// (and other classes that have a fromJson / fromMap method)
-        /// which have it's own methods to convert from and to json
-        /// it will assume that the fromJson / fromMap method is static or it's
-        /// a factory constructor with the first positional argument being a map
-        const possibleDeserializers = ['fromJson', 'fromMap'];
-        for (var possibleDeserializer in possibleDeserializers) {
-          final deserializerReflectee =
-              reflectionClassMirror.tryCallStaticMethodOrFactoryConstructor(
-            methodName: possibleDeserializer,
-            positionalArguments: [
-              data,
-            ],
-          );
-          if (deserializerReflectee != null) {
-            return deserializerReflectee;
+        if (tryUseNativeSerializerMethodsIfAny) {
+          /// this is required to process json_serializable classes
+          /// (and other classes that have a fromJson / fromMap method)
+          /// which have it's own methods to convert from and to json
+          /// it will assume that the fromJson / fromMap method is static or it's
+          /// a factory constructor with the first positional argument being a map
+          const possibleDeserializers = ['fromJson', 'fromMap'];
+          for (var possibleDeserializer in possibleDeserializers) {
+            final deserializerReflectee = reflectionClassMirror.tryCallStaticMethodOrFactoryConstructor(
+              methodName: possibleDeserializer,
+              positionalArguments: [
+                data,
+              ],
+            );
+            if (deserializerReflectee != null) {
+              return deserializerReflectee;
+            }
           }
         }
 
-        final declarations =
-            reflectionClassMirror.includeParentDeclarationsIfNecessary();
+        /// to support reversed key conversion
+        /// if the values were previously converted using a SnakeToCamel converter
+        /// this will try to convert them back to snake case
+        JsonKeyNameConverter? classLevelKeyNameConverter = reflectionClassMirror.tryGetKeyNameConverter();
+
+        final declarations = reflectionClassMirror.includeParentDeclarationsIfNecessary();
         for (var declaration in declarations.entries) {
           DeclarationMirror? declarationMirror;
+          JsonKeyNameConverter? keyNameConverter = classLevelKeyNameConverter;
 
           /// this hack is needed to be able to access private fields
           /// simply calling reflectionClassMirror.declarations[Symbol(kv.key)]; won't work
@@ -295,13 +374,60 @@ extension TypeExtension on Type {
           /// toName() extension doesn't care for that, it uses a RegExp to parse
           /// the name
           String simpleName = declaration.key.toName();
+          String? oldKey;
+          String? newKey;
           if (declaration.value is VariableMirror) {
-            final VariableMirror variableMirror =
-                declaration.value as VariableMirror;
-            final jsonKey =
-                variableMirror.getAnnotationsOfType<JsonKey>().firstOrNull;
+            final VariableMirror variableMirror = declaration.value as VariableMirror;
+
+            final jsonKey = variableMirror.getAnnotationsOfType<JsonKey>().firstOrNull;
             if (jsonKey?.name?.isNotEmpty == true) {
+              if (onKeyConversion != null) {
+                oldKey = simpleName;
+              }
               simpleName = jsonKey!.name!;
+              if (oldKey != null) {
+                newKey = simpleName;
+                onKeyConversion!(
+                  ConvertedKey(
+                    oldKey: oldKey,
+                    newKey: newKey,
+                  ),
+                );
+              }
+            } else {
+              if (tryApplyReversedKeyConversion) {
+                final variableLevelKeyNameConverter = variableMirror.tryGetKeyNameConverter(
+                  variableName: simpleName,
+                );
+                if (variableLevelKeyNameConverter != null) {
+                  keyNameConverter = variableLevelKeyNameConverter;
+                }
+                if (keyNameConverter != null) {
+                  if (onKeyConversion != null) {
+                    oldKey = simpleName;
+                  }
+                  if (!simpleName.isUndeterminedCase()) {
+                    bool allowConversion = false;
+                    if (keyNameConverter is SnakeToCamel) {
+                      allowConversion = simpleName.isCamelCase();
+                    } else if (keyNameConverter is CamelToSnake) {
+                      allowConversion = simpleName.isSnakeCase();
+                    }
+                    if (allowConversion) {
+                      simpleName = keyNameConverter.convert(simpleName);
+                      if (oldKey != null) {
+                        newKey = simpleName;
+                        onKeyConversion!(
+                          ConvertedKey(
+                            oldKey: oldKey,
+                            newKey: newKey,
+                          ),
+                        );
+                      }
+                    }
+                  }
+                }
+              }
             }
           }
           declarationMirror = declaration.value;
@@ -312,13 +438,11 @@ extension TypeExtension on Type {
 
           if (declarationMirror is VariableMirror) {
             final VariableMirror variableMirror = declarationMirror;
-            if (variableMirror.isConst ||
-                variableMirror.isJsonIgnored(SerializationDirection.fromJson)) {
+            if (variableMirror.isConst || variableMirror.isJsonIgnored(SerializationDirection.fromJson)) {
               continue;
             }
             if (variableMirror.isPrivate) {
-              if (!variableMirror
-                  .isJsonIncluded(SerializationDirection.fromJson)) {
+              if (!variableMirror.isJsonIncluded(SerializationDirection.fromJson)) {
                 continue;
               }
             }
@@ -329,8 +453,7 @@ extension TypeExtension on Type {
                   : variableClassMirror.runtimeType;
               final isEnum = variableClassMirror.isEnum;
 
-              final valueConverters =
-                  variableMirror.getAnnotationsOfType<JsonValueConverter>();
+              final valueConverters = variableMirror.getAnnotationsOfType<JsonValueConverter>();
               var value = valueFromJson;
 
               for (final converter in valueConverters) {
@@ -345,8 +468,7 @@ extension TypeExtension on Type {
 
               value = fieldType.fromJson(value);
 
-              final valueValidators =
-                  variableMirror.getAnnotationsOfType<JsonValueValidator>();
+              final valueValidators = variableMirror.getAnnotationsOfType<JsonValueValidator>();
               final variableName = variableMirror.simpleName.toName();
               for (final validator in valueValidators) {
                 validator.validate(
@@ -357,10 +479,7 @@ extension TypeExtension on Type {
               try {
                 instanceMirror.setField(
                   variableMirror.simpleName,
-                  value ??
-                      instanceMirror
-                          .getField(variableMirror.simpleName)
-                          .reflectee,
+                  value ?? instanceMirror.getField(variableMirror.simpleName).reflectee,
                 );
               } catch (_) {
                 /// this exception is suppressed to avoid setting
@@ -378,10 +497,7 @@ extension TypeExtension on Type {
               try {
                 instanceMirror.setField(
                   variableMirror.simpleName,
-                  valueFromJson ??
-                      instanceMirror
-                          .getField(variableMirror.simpleName)
-                          .reflectee,
+                  valueFromJson ?? instanceMirror.getField(variableMirror.simpleName).reflectee,
                 );
               } catch (_) {
                 /// this exception is suppressed to avoid setting
@@ -475,9 +591,7 @@ extension VariableMirrorExtension on VariableMirror {
   }
 
   String? get alternativeName {
-    return getAnnotationsOfType<JsonKey>()
-        .firstWhereOrNull((e) => e.name != null)
-        ?.name;
+    return getAnnotationsOfType<JsonKey>().firstWhereOrNull((e) => e.name != null)?.name;
   }
 }
 
@@ -498,8 +612,7 @@ extension ClassMirrorExtension on ClassMirror {
     List<Object?> positionalArguments = const [],
     Map<Symbol, Object?> namedArguments = const {},
   }) {
-    final factoryConstructorSymbol =
-        Symbol('${reflectedType.toString()}.$methodName');
+    final factoryConstructorSymbol = Symbol('${reflectedType.toString()}.$methodName');
     final methodSymbol = Symbol(methodName);
     if (declarations.containsKey(methodSymbol)) {
       return invoke(
@@ -509,8 +622,7 @@ extension ClassMirrorExtension on ClassMirror {
       ).reflectee;
     } else if (declarations.containsKey(factoryConstructorSymbol)) {
       final possibleFactoryConstructor = declarations[factoryConstructorSymbol];
-      if (possibleFactoryConstructor is MethodMirror &&
-          possibleFactoryConstructor.isFactoryConstructor) {
+      if (possibleFactoryConstructor is MethodMirror && possibleFactoryConstructor.isFactoryConstructor) {
         return newInstance(
           methodSymbol,
           positionalArguments,
@@ -602,8 +714,7 @@ extension ClassMirrorExtension on ClassMirror {
   }
 
   bool get isList {
-    return qualifiedName == const Symbol('dart.core.List') ||
-        qualifiedName == const Symbol('dart.core.GrowableList');
+    return qualifiedName == const Symbol('dart.core.List') || qualifiedName == const Symbol('dart.core.GrowableList');
   }
 
   bool get isMap {

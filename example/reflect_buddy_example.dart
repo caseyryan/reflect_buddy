@@ -18,11 +18,14 @@ void main() {
   // _processSimpleUserWithPrivateId();
   // _processUserWrapperWithCustomDate();
   // _keyNameConversion();
-  // _convertKeyNamesByClassAnnotation();
+  _convertKeyNamesByClassAnnotation();
   // _validateContacts();
   // _processJsonSerializable();
-  _tryIgnoreDefaultValues();
+  // _tryIgnoreDefaultValues();
+  // _toJsonWithDefaultValues();
 }
+
+void _toJsonWithDefaultValues() {}
 
 void _tryIgnoreDefaultValues() {
   final emptyMap = {};
@@ -47,7 +50,9 @@ void _processJsonSerializable() {
   /// class and call it internally
   final human = (HumanJsonSerializable).fromJson(map);
   print(human);
-  final json = human?.toJson();
+  final json = human?.toJson(
+    tryUseNativeSerializerMethodsIfAny: true,
+  );
   print(json);
 }
 
@@ -107,18 +112,33 @@ class ContactData {
 }
 
 void _convertKeyNamesByClassAnnotation() {
-  final instance = fromJson<SimpleUserClassKeyNames>({
-    'firstName': 'Konstantin',
-    'lastName': 'Serov',
-    'age': 36,
-    'gender': 'male',
-    'dateOfBirth': '1987-01-02T21:50:45.241520'
-  });
+  final instance = fromJson<SimpleUserClassKeyNames>(
+    {
+      'firstName': 'Konstantin',
+      'lastName': 'Serov',
+      'age': 36,
+      'gender': 'male',
+      'dateOfBirth': '1987-01-02T21:50:45.241520'
+    },
+    tryApplyReversedKeyConversion: true,
+  );
   print(instance);
   final json = instance?.toJson(
-    keyNameConverter: CamelToSnake(),
+    // keyNameConverter: CamelToSnake(),
+    onKeyConversion: (ConvertedKey result) {
+      print(result);
+    },
   );
   print(json);
+
+  /// Notice that the key conversion is reversed here
+  // final reverseKeyInstance = (SimpleUserClassKeyNames).fromJson(
+  //   json,
+  //   onKeyConversion: (ConvertedKey result) {
+  //     // print(result);
+  //   },
+  // );
+  // print(reverseKeyInstance);
 }
 
 /// The most simple case. A flat structure with built-in types
@@ -219,13 +239,7 @@ class SimpleUserClassKeyNames {
 void _processUserWrapperWithCustomDate() {
   final instance = fromJson<SimpleContainerWithCustomClass>({
     'id': 'userId123',
-    'user': {
-      'firstName': 'Konstantin',
-      'lastName': 'Serov',
-      'age': 36,
-      'gender': 'male',
-      'dateOfBirth': '1987_01_01'
-    }
+    'user': {'firstName': 'Konstantin', 'lastName': 'Serov', 'age': 36, 'gender': 'male', 'dateOfBirth': '1987_01_01'}
   });
   print(instance);
   final json = instance?.toJson();

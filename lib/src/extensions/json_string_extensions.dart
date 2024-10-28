@@ -8,6 +8,18 @@ extension JsonStringExtensions on String {
     return '$first${substring(1)}';
   }
 
+  bool isSnakeCase() {
+    return _oddUnderscores.hasMatch(this);
+  }
+
+  bool isCamelCase() {
+    return _uppercase.hasMatch(this) && !isSnakeCase();
+  }
+
+  bool isUndeterminedCase() {
+    return !isSnakeCase() && !isCamelCase() || isSnakeCase() && isCamelCase();
+  }
+
   String lastCharacter() {
     if (length < 1) return '';
     return this[length - 1];

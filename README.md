@@ -444,6 +444,20 @@ event if the field is private
 - `@SnakeToCamel()`- converts a field name to `camelCaseStyle` 
 - `@FirstToUpper()` - converts a first letter of a field name to upper case
 
+`toJson()` and `fromJson` methods also have a `tryUseNativeSerializerMethodsIfAny` argument. 
+If you pass `true` to it, it will try to use the native `toJson` / `fromJson` methods if any. 
+This is useful when you want to use a class generated using `json_serializable` package.
+
+also both `toJson` and `fromJson` methods have an `onKeyConversion` argument. 
+It is a callback that will be called for every key that is being converted. 
+It is useful for logging purposes or for other purposes like creating a database indices to understand what key was converted to what
+
+```dart
+onKeyConversion: (ConvertedKey result) {
+  print(result);
+}
+```
+
 ### No category
 - `@JsonIncludeParentFields()` allows `toJson()` also add parent fields
 
