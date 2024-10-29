@@ -11,6 +11,14 @@ enum Gender {
   female,
 }
 
+@CamelToSnake()
+class Car {
+  int? id;
+
+  String? manufacturer;
+  int? enginePower;
+}
+
 void main() {
   /// Just uncomment any example to run it
   // _chainedInheritance();
@@ -18,11 +26,23 @@ void main() {
   // _processSimpleUserWithPrivateId();
   // _processUserWrapperWithCustomDate();
   // _keyNameConversion();
-  _convertKeyNamesByClassAnnotation();
+  // _convertKeyNamesByClassAnnotation();
   // _validateContacts();
   // _processJsonSerializable();
   // _tryIgnoreDefaultValues();
   // _toJsonWithDefaultValues();
+  _carFromJson();
+}
+
+void _carFromJson() {
+  final car = fromJson<Car>(
+    {
+      'id': 1,
+      'manufacturer': 'BMW',
+      'engine_power': 100,
+    },
+  );
+  print(car);
 }
 
 void _toJsonWithDefaultValues() {}
@@ -239,7 +259,13 @@ class SimpleUserClassKeyNames {
 void _processUserWrapperWithCustomDate() {
   final instance = fromJson<SimpleContainerWithCustomClass>({
     'id': 'userId123',
-    'user': {'firstName': 'Konstantin', 'lastName': 'Serov', 'age': 36, 'gender': 'male', 'dateOfBirth': '1987_01_01'}
+    'user': {
+      'firstName': 'Konstantin',
+      'lastName': 'Serov',
+      'age': 36,
+      'gender': 'male',
+      'dateOfBirth': '1987_01_01'
+    }
   });
   print(instance);
   final json = instance?.toJson();

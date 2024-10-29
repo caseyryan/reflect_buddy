@@ -1,3 +1,5 @@
+## 1.5.5
+- Fixed reverse key conversion for `fromJson` method
 ## 1.5.4
 - Added onKeyConversion: (ConvertedKey result) {} callback to both `toJson` and `fromJson` methods
 - Added tryUseNativeSerializerMethodsIfAny: true to both `toJson` and `fromJson` methods
