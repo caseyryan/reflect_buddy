@@ -24,6 +24,49 @@ class ConvertedKey {
   }
 }
 
+bool _alwaysIncludeParentFields = false;
+set alwaysIncludeParentFields(bool value) {
+  if (value == true) {
+    print(
+      '--> You have just set a global alwaysIncludeParentFields to true\n--> This will affect all classes that don\'t have an explicit JsonIncludeParentFields() annotation',
+    );
+  }
+  _alwaysIncludeParentFields = value;
+}
+
+bool get alwaysIncludeParentFields => _alwaysIncludeParentFields;
+
+JsonKeyNameConverter? _defaultKeyNameConverter;
+get globalDefaultKeyNameConverter => _defaultKeyNameConverter;
+
+set customGlobalKeyNameConverter(JsonKeyNameConverter? value) {
+  if (value != null) {
+    print(
+        '--> You have just set a custom global key name converter of type: ${value.runtimeType}\n--> ${value.description}');
+  }
+  _defaultKeyNameConverter = value;
+}
+
+set useCamelToStakeForAll(bool value) {
+  if (value == false) {
+    if (_defaultKeyNameConverter is CamelToSnake) {
+      customGlobalKeyNameConverter = null;
+    }
+  } else {
+    customGlobalKeyNameConverter = CamelToSnake();
+  }
+}
+
+set useSnakeToCamelForAll(bool value) {
+  if (value == false) {
+    if (_defaultKeyNameConverter is SnakeToCamel) {
+      customGlobalKeyNameConverter = null;
+    }
+  } else {
+    customGlobalKeyNameConverter = SnakeToCamel();
+  }
+}
+
 typedef OnKeyConversion = Function(ConvertedKey);
 
 /// [onKeyConversion] is a callback that will be called
@@ -76,6 +119,7 @@ extension JsonObjectExtension on Object {
     JsonKeyNameConverter? keyNameConverter,
     OnKeyConversion? onKeyConversion,
   }) {
+    keyNameConverter ??= globalDefaultKeyNameConverter;
     if (runtimeType.isPrimitive) {
       return this;
     } else if (this is Map) {
@@ -173,7 +217,6 @@ extension JsonObjectExtension on Object {
         } else if (rawValue is Enum) {
           value = rawValue.enumToString();
         } else if (rawValue is DateTime) {
-          // TODO: try to apply value converter
           value = rawValue.toIso8601String();
         } else if (rawValue is Map) {
           value = rawValue.map(
@@ -369,7 +412,8 @@ extension TypeExtension on Type {
         /// if the values were previously converted using a SnakeToCamel converter
         /// this will try to convert them back to snake case
         JsonKeyNameConverter? classLevelKeyNameConverter =
-            reflectionClassMirror.tryGetKeyNameConverter();
+            reflectionClassMirror.tryGetKeyNameConverter() ??
+                globalDefaultKeyNameConverter;
 
         final declarations =
             reflectionClassMirror.includeParentDeclarationsIfNecessary();
@@ -631,6 +675,13 @@ extension ClassMirrorExtension on ClassMirror {
         true;
   }
 
+  bool excludeParentFields() {
+    return metadata.any(
+          (e) => e.reflectee.runtimeType == JsonExcludeParentFields,
+        ) ==
+        true;
+  }
+
   Object? tryCallStaticMethodOrFactoryConstructor({
     required String methodName,
     List<Object?> positionalArguments = const [],
@@ -662,14 +713,18 @@ extension ClassMirrorExtension on ClassMirror {
   Map<Symbol, DeclarationMirror> includeParentDeclarationsIfNecessary() {
     Map<Symbol, DeclarationMirror> childDeclarations = declarations;
     ClassMirror? type = superclass;
-    if (includeParentFields() == true) {
+    if ((includeParentFields() == true || alwaysIncludeParentFields) &&
+        !excludeParentFields()) {
       final tempDeclarations = {...childDeclarations};
       while (type != null) {
         final declarations = type.declarations.entries.where(
           (e) => e.value is VariableMirror,
         );
+
         type = type.superclass;
-        final needsToIncludeParent = type?.includeParentFields() == true;
+        final needsToIncludeParent = (type?.includeParentFields() == true ||
+                alwaysIncludeParentFields) &&
+            !(type?.excludeParentFields() == true);
         if (!needsToIncludeParent) {
           type = null;
         }

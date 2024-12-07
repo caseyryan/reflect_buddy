@@ -1,6 +1,6 @@
 name: reflect_buddy
 description: A powerful live Dart JSON serializer / deserializer based on reflection
-version: 1.5.5
+version: 1.5.8
 repository: https://github.com/caseyryan/reflect_buddy
 
 environment:

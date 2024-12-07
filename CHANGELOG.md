@@ -1,3 +1,10 @@
+## 1.5.8
+- Added global setters for `useCamelToStakeForAll` or `useSnakeToCamelForAll` that 
+allow to use some type of key converters for all field names
+- Also added `customGlobalKeyNameConverter` setter where you can set your own converter
+- Added global setter for `alwaysIncludeParentFields` that allows to include parent fields for all classes that don't have an explicit `JsonIncludeParentFields()` annotation
+- Added `JsonExcludeParentFields()` annotation that allows to exclude parent fields from a particular class
+in case `alwaysIncludeParentFields` is set to true globally
 ## 1.5.5
 - Fixed reverse key conversion for `fromJson` method
 ## 1.5.4

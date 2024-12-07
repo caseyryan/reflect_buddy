@@ -20,6 +20,13 @@ class JsonIncludeParentFields {
   const JsonIncludeParentFields();
 }
 
+/// Oposite of [JsonIncludeParentFields]
+/// it can be used to exclude parent fields from a class
+/// when global setter [alwaysIncludeParentFields] is set to true
+class JsonExcludeParentFields {
+  const JsonExcludeParentFields();
+}
+
 class JsonInclude extends JsonKey {
   const JsonInclude({
     List<SerializationDirection> includeDirections = const [

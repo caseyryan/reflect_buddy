@@ -3,6 +3,7 @@
 import 'package:reflect_buddy/reflect_buddy.dart';
 
 import 'json_serializable_example/human_json_serializable.dart';
+import 'test_models.dart';
 
 /// Notice that this Enum also does not have any annotations
 /// or helper methods
@@ -31,7 +32,23 @@ void main() {
   // _processJsonSerializable();
   // _tryIgnoreDefaultValues();
   // _toJsonWithDefaultValues();
-  _carFromJson();
+  // _carFromJson();
+  // final data = (User).fromJson({
+  //   // 'id': 1,
+  // });
+  // print(data);
+  useCamelToStakeForAll = true;
+  alwaysIncludeParentFields = true;
+  var user = User()
+    ..id = 1
+    ..firstName = 'Konstantin'
+    ..createdAt = DateTime.now();
+
+  final map = user.toJson() as Map;
+  print(map);
+
+  var newUser = (User).fromJson(map);
+  print(newUser);
 }
 
 void _carFromJson() {

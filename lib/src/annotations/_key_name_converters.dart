@@ -3,6 +3,8 @@ part of 'json_annotations.dart';
 abstract class JsonKeyNameConverter {
   const JsonKeyNameConverter();
   String convert(String value);
+
+  String get description;
 }
 
 /// Used for json serialization. This annotation (is set on class)
@@ -16,6 +18,10 @@ class FirstToUpper extends JsonKeyNameConverter {
   String convert(String value) {
     return value.firstToUpperCase();
   }
+
+  @override
+  String get description =>
+      '$runtimeType converter takes a string value and convert its first letter to uppercase. e.g. firstName will be converted to FirstName';
 }
 
 /// Converts keys to snake case. Can be used on classes
@@ -29,6 +35,10 @@ class CamelToSnake extends JsonKeyNameConverter {
   String convert(String value) {
     return value.camelToSnake();
   }
+
+  @override
+  String get description =>
+      '$runtimeType converter takes a string value and converts it to a snake case register. e.g. userFirstName will be converted to user_first_name';
 }
 
 class SnakeToCamel extends JsonKeyNameConverter {
@@ -38,4 +48,8 @@ class SnakeToCamel extends JsonKeyNameConverter {
   String convert(String value) {
     return value.snakeToCamel();
   }
+
+  @override
+  String get description =>
+      '$runtimeType converter takes a string value and converts it to a camel case register. e.g. user_first_name will be converted to userFirstName';
 }
