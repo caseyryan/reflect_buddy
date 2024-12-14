@@ -1,3 +1,5 @@
+## 1.5.9
+- Added `useValidators` parameter to `fromJson` method. Pass false to skip validators
 ## 1.5.8
 - Added global setters for `useCamelToStakeForAll` or `useSnakeToCamelForAll` that 
 allow to use some type of key converters for all field names

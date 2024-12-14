@@ -47,7 +47,9 @@ void main() {
   final map = user.toJson() as Map;
   print(map);
 
-  var newUser = (User).fromJson(map);
+  var newUser = (User).fromJson({
+    'bithDate': '2022-01-01T21:50:45.241520',
+  });
   print(newUser);
 }
 

@@ -5,6 +5,11 @@ class User extends BaseModel {
   String? firstName;
   String? lastName;
   String? email;
+
+  @JsonDateConverter(
+    dateFormat: 'yyyy-MM-dd',
+  )
+  DateTime? birthDate;
 }
 
 class BaseModel {
