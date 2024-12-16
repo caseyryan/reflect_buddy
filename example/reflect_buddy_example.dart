@@ -11,6 +11,17 @@ enum Gender {
   female,
 }
 
+class FillTest {
+  Object? type;
+  FillTest({
+    this.type,
+  });
+}
+
+class InnerTypeTest {
+  String? innerName;
+}
+
 @CamelToSnake()
 class Car {
   int? id;
@@ -31,8 +42,22 @@ void main() {
   // _processJsonSerializable();
   // _tryIgnoreDefaultValues();
   // _toJsonWithDefaultValues();
-  _carFromJson();
+  // _carFromJson();
+
+  // final fillTest = FillTest(
+  //   type: InnerTypeTest,
+  // );
+  // final json = fillTest.toJson(
+  //   includeNullValues: true,
+  // );
+  // print(json);
+  final asJson = (InnerTypeTest).toJson(
+    includeNullValues: true,
+  );
+  print(asJson);
 }
+
+
 
 void _carFromJson() {
   final car = fromJson<Car>(
