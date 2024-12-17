@@ -3,6 +3,7 @@
 import 'package:reflect_buddy/reflect_buddy.dart';
 
 import 'json_serializable_example/human_json_serializable.dart';
+import 'test_models.dart';
 
 /// Notice that this Enum also does not have any annotations
 /// or helper methods
@@ -20,6 +21,9 @@ class FillTest {
 
 class InnerTypeTest {
   String? innerName;
+
+  @JsonDateConverter(dateFormat: 'yyyy-MM-dd')
+  DateTime? birthDate;
 }
 
 @CamelToSnake()
@@ -53,6 +57,14 @@ void main() {
   // print(json);
   final asJson = (InnerTypeTest).toJson(
     includeNullValues: true,
+    onBeforeValueSetting: (value, dartType, keyName) {
+      if (dartType == String) {
+        return 'Some string';
+      } else if (dartType == DateTime) {
+        return DateTime.now();
+      }
+      return value;
+    },
   );
   print(asJson);
   // final data = (User).fromJson({
@@ -69,13 +81,11 @@ void main() {
   // final map = user.toJson() as Map;
   // print(map);
 
-  // var newUser = (User).fromJson({
-  //   'birthDate': '2022-01-01T21:50:45.241520',
-  // });
-  // print(newUser);
+  var newUser = (User).fromJson({
+    'birthDate': '2022-01-01T21:50:45.241520',
+  });
+  print(newUser);
 }
-
-
 
 void _carFromJson() {
   final car = fromJson<Car>(

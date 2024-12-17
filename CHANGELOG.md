@@ -1,3 +1,5 @@
+## 1.6.0
+- Added `OnBeforeValueSetting` callback. This callback is used in `toJson` method right after the key name conversion and right before the value conversion. This might come useful when you need to represent the object filled with default values like an API documentation generator by type
 ## 1.5.9
 - Added `useValidators` parameter to `fromJson` method. Pass false to skip validators
 ## 1.5.8
