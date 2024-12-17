@@ -21,7 +21,7 @@ class FillTest {
 
 class InnerTypeTest {
   String? innerName;
-
+  Car? car;
   @JsonDateConverter(dateFormat: 'yyyy-MM-dd')
   DateTime? birthDate;
 }
@@ -47,14 +47,24 @@ void main() {
   // _tryIgnoreDefaultValues();
   // _toJsonWithDefaultValues();
   // _carFromJson();
+  // _fillWithDefaultValues();
+  _instantiateNonDefaultConstructor();
+}
 
-  // final fillTest = FillTest(
-  //   type: InnerTypeTest,
-  // );
-  // final json = fillTest.toJson(
-  //   includeNullValues: true,
-  // );
-  // print(json);
+
+
+void _instantiateNonDefaultConstructor() {
+  /// this class doesn't have a default constructor
+  /// and still it must be serialized
+  final json = (BadRequestException).toJson(
+    includeNullValues: true
+  );
+  // final json = (Car).toJson();
+  print(json);
+}
+
+
+void _fillWithDefaultValues() {
   final asJson = (InnerTypeTest).toJson(
     includeNullValues: true,
     onBeforeValueSetting: (value, dartType, keyName) {
@@ -62,29 +72,17 @@ void main() {
         return 'Some string';
       } else if (dartType == DateTime) {
         return DateTime.now();
+      } else if (dartType == int) {
+        return 0;
+      } else {
+        if (!dartType.isPrimitive) {
+          return dartType.newTypedInstance();
+        }
       }
       return value;
     },
   );
   print(asJson);
-  // final data = (User).fromJson({
-  //   // 'id': 1,
-  // });
-  // print(data);
-  // useCamelToStakeForAll = true;
-  // alwaysIncludeParentFields = true;
-  // var user = User()
-  //   ..id = 1
-  //   ..firstName = 'Konstantin'
-  //   ..createdAt = DateTime.now();
-
-  // final map = user.toJson() as Map;
-  // print(map);
-
-  var newUser = (User).fromJson({
-    'birthDate': '2022-01-01T21:50:45.241520',
-  });
-  print(newUser);
 }
 
 void _carFromJson() {
@@ -312,13 +310,7 @@ class SimpleUserClassKeyNames {
 void _processUserWrapperWithCustomDate() {
   final instance = fromJson<SimpleContainerWithCustomClass>({
     'id': 'userId123',
-    'user': {
-      'firstName': 'Konstantin',
-      'lastName': 'Serov',
-      'age': 36,
-      'gender': 'male',
-      'dateOfBirth': '1987_01_01'
-    }
+    'user': {'firstName': 'Konstantin', 'lastName': 'Serov', 'age': 36, 'gender': 'male', 'dateOfBirth': '1987_01_01'}
   });
   print(instance);
   final json = instance?.toJson();
