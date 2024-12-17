@@ -55,6 +55,24 @@ void main() {
     includeNullValues: true,
   );
   print(asJson);
+  // final data = (User).fromJson({
+  //   // 'id': 1,
+  // });
+  // print(data);
+  // useCamelToStakeForAll = true;
+  // alwaysIncludeParentFields = true;
+  // var user = User()
+  //   ..id = 1
+  //   ..firstName = 'Konstantin'
+  //   ..createdAt = DateTime.now();
+
+  // final map = user.toJson() as Map;
+  // print(map);
+
+  // var newUser = (User).fromJson({
+  //   'birthDate': '2022-01-01T21:50:45.241520',
+  // });
+  // print(newUser);
 }
 
 
