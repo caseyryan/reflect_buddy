@@ -147,6 +147,9 @@ extension JsonObjectExtension on Object {
           newMap[key] = (kv.value as Object).toJson(
             includeNullValues: includeNullValues,
             keyNameConverter: keyNameConverter,
+            onBeforeValueSetting: onBeforeValueSetting,
+            tryUseNativeSerializerMethodsIfAny: tryUseNativeSerializerMethodsIfAny,
+            onKeyConversion: onKeyConversion,
           );
         }
       }
