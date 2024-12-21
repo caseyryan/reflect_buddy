@@ -140,13 +140,15 @@ extension JsonObjectExtension on Object {
       final newMap = {};
       final curMap = this as Map;
       for (var kv in curMap.entries) {
+        final key = (kv.key as Object).toJson();
         if (kv.value == null) {
-          continue;
+          newMap[key] = null;
+        } else {
+          newMap[key] = (kv.value as Object).toJson(
+            includeNullValues: includeNullValues,
+            keyNameConverter: keyNameConverter,
+          );
         }
-        newMap[(kv.key as Object).toJson()] = (kv.value as Object).toJson(
-          includeNullValues: includeNullValues,
-          keyNameConverter: keyNameConverter,
-        );
       }
       return newMap;
     } else if (this is Enum) {
