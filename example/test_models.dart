@@ -2,7 +2,9 @@ import 'package:reflect_buddy/reflect_buddy.dart';
 
 import 'reflect_buddy_example.dart';
 
-// @JsonIncludeParentFields()
+class ExtendedUser extends User {}
+
+@JsonExcludeParentFields()
 class User extends BaseModel {
   String? firstName;
   String? lastName;
@@ -14,6 +16,7 @@ class User extends BaseModel {
   DateTime? birthDate;
 }
 
+@JsonExcludeParentFields()
 class BaseModel {
   int? id;
   @JsonDateConverter(dateFormat: 'yyyy_MM_dd')

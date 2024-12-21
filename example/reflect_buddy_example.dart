@@ -1,6 +1,7 @@
 // ignore_for_file: unused_field, unused_element
 
 import 'package:reflect_buddy/reflect_buddy.dart';
+import 'package:reflect_buddy/reflect_buddy.dart';
 
 import 'json_serializable_example/human_json_serializable.dart';
 import 'test_models.dart';
@@ -48,21 +49,25 @@ void main() {
   // _toJsonWithDefaultValues();
   // _carFromJson();
   // _fillWithDefaultValues();
-  _instantiateNonDefaultConstructor();
+  // _instantiateNonDefaultConstructor();
+
+  alwaysIncludeParentFields = true;
+  final user = User()
+    ..id = 10
+    ..firstName = 'Konstantin';
+  final json = user.toJson() as Map;
+
+  final extUser = (ExtendedUser).fromJson(json);
+  print(extUser);
 }
-
-
 
 void _instantiateNonDefaultConstructor() {
   /// this class doesn't have a default constructor
   /// and still it must be serialized
-  final json = (BadRequestException).toJson(
-    includeNullValues: true
-  );
+  final json = (BadRequestException).toJson(includeNullValues: true);
   // final json = (Car).toJson();
   print(json);
 }
-
 
 void _fillWithDefaultValues() {
   final asJson = (InnerTypeTest).toJson(
@@ -310,7 +315,13 @@ class SimpleUserClassKeyNames {
 void _processUserWrapperWithCustomDate() {
   final instance = fromJson<SimpleContainerWithCustomClass>({
     'id': 'userId123',
-    'user': {'firstName': 'Konstantin', 'lastName': 'Serov', 'age': 36, 'gender': 'male', 'dateOfBirth': '1987_01_01'}
+    'user': {
+      'firstName': 'Konstantin',
+      'lastName': 'Serov',
+      'age': 36,
+      'gender': 'male',
+      'dateOfBirth': '1987_01_01'
+    }
   });
   print(instance);
   final json = instance?.toJson();
