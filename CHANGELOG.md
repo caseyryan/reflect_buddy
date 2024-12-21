@@ -1,3 +1,5 @@
+## 1.6.4
+- Fixed an issue with `null` values in maps
 ## 1.6.3
 - Excluded static getters from parsing
 ## 1.6.2
