@@ -1,3 +1,5 @@
+## 1.6.3
+- Excluded static getters from parsing
 ## 1.6.2
 - Fixed an issue with `JsonExcludeParentFields()` when this lead to not inclusion of the fields from current 
 superclass

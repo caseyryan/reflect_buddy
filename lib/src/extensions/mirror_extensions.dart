@@ -205,6 +205,9 @@ extension JsonObjectExtension on Object {
     for (var kv in declarations.entries) {
       if (kv.value is VariableMirror) {
         final variableMirror = kv.value as VariableMirror;
+        if (variableMirror.isStatic) {
+          continue;
+        }
         Object? rawValue = instanceMirror
             .getField(
               variableMirror.simpleName,
@@ -307,35 +310,6 @@ extension JsonObjectExtension on Object {
                 tryUseNativeSerializerMethodsIfAny,
           );
         }
-
-        // String? oldKey;
-        // String? newKey;
-        // if (onKeyConversion != null) {
-        //   oldKey = variableMirror.name;
-        // }
-
-        // final variableName = alternativeName ??
-        //     variableMirror.tryConvertVariableNameViaAnnotation(
-        //       variableName: variableMirror.name,
-        //       keyNameConverter: keyNameConverter,
-        //     );
-        // if (oldKey != null) {
-        //   newKey = variableName;
-        //   onKeyConversion!(
-        //     ConvertedKey(
-        //       oldKey: oldKey,
-        //       newKey: newKey,
-        //     ),
-        //   );
-        // }
-        /// a real type of variable
-        /// this might come useful when you want to fill
-        /// the map with some default values
-        // final dartType = variableMirror.type.reflectedType;
-        // if (value == null) {
-        //   // надо придумать как назначить тут переменную null
-        //   print(value);
-        // }
         json[variableName] = value;
       }
     }
