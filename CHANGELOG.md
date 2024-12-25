@@ -1,3 +1,5 @@
+## 1.7.2
+- More accurate documentation generation for dart types
 ## 1.7.1
 - Excluded `Object` and `Object?` types from documentation
 ## 1.7.0

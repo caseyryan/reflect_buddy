@@ -402,17 +402,17 @@ extension TypeExtension on Type {
     String typeName,
     Map types,
   ) {
-    final buffer = StringBuffer('$typeName \n');
+    final buffer = StringBuffer('class $typeName {\n');
     for (var kv in json.entries) {
       final innerType = json['${kv.key}__TYPE__'];
-      bool isLinkedType = false;
+      // bool isLinkedType = false;
       if (innerType is Type) {
         if (!innerType.isPrimitive) {
           if (!innerType.isDateTime &&
               !innerType.isListType &&
               !innerType.isMapType &&
               !innerType.isRawObjectType) {
-            isLinkedType = true;
+            // isLinkedType = true;
           }
         }
       }
@@ -422,7 +422,6 @@ extension TypeExtension on Type {
         /// the type itself
         if (kv.value is Type) {
           final asType = kv.value as Type;
-          isLinkedType = true;
 
           /// this case means we need to to describe some custom type
           if (asType.isPrimitive == false) {
@@ -449,11 +448,8 @@ extension TypeExtension on Type {
         continue;
       }
       final rawTypeName = innerType.toString();
-
-      /// Wrap type in brackets to be compatible with a markdown link format
-      String typeName =
-          !isLinkedType ? rawTypeName : '[$rawTypeName]($rawTypeName)';
-      buffer.writeln('\t$typeName ${kv.key}: ${kv.value}');
+      // buffer.writeln('\t$rawTypeName ${kv.key}: ${kv.value}');
+      buffer.writeln('\t$rawTypeName ${kv.key};');
     }
     buffer.writeln('}');
     types[typeName] = buffer.toString();
