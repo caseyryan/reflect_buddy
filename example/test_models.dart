@@ -8,6 +8,7 @@ class ExtendedUser extends User {
 
   List<Car>? cars;
   Map<String, Car>? carsMap;
+  Object? object;
 }
 
 // @JsonExcludeParentFields()

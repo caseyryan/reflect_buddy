@@ -1,3 +1,5 @@
+## 1.7.1
+- Excluded `Object` and `Object?` types from documentation
 ## 1.7.0
 - Add `documentType()` extension method on `Type` which can be used to generate 
 documentation

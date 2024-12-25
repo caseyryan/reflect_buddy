@@ -348,7 +348,7 @@ extension JsonObjectExtension on Object {
 extension InstanceMirrorExtension on InstanceMirror {
   /// Just adds parent fields if necessary.
   Map<Symbol, DeclarationMirror> includeParentDeclarationsIfNecessary() {
-    return type.includeParentDeclarations();
+    return type.includeParentDeclarationsIfNecessary();
   }
 
   Object? tryCallMethod({
@@ -401,7 +401,7 @@ extension TypeExtension on Type {
       bool isLinkedType = false;
       if (innerType is Type) {
         if (!innerType.isPrimitive) {
-          if (!innerType.isDateTime && !innerType.isListType && !innerType.isMapType) {
+          if (!innerType.isDateTime && !innerType.isListType && !innerType.isMapType && !innerType.isRawObjectType) {
             isLinkedType = true;
           }
         }
@@ -419,7 +419,7 @@ extension TypeExtension on Type {
             if (asType.isDateTime) {
               continue;
             } else {
-              if (asType.isListType || asType.isMapType) {
+              if (asType.isListType || asType.isMapType || asType.isRawObjectType) {
                 /// A simple check. We just don't need to display the contents
                 /// of these types even though it will work
                 ///
@@ -505,6 +505,11 @@ extension TypeExtension on Type {
 
   bool get isMapType {
     return toString().contains('Map');
+  }
+
+  bool get isRawObjectType {
+    final strType = toString();
+    return strType == 'Object' || strType == 'Object?';
   }
 
   /// [tryUseNativeSerializerMethodsIfAny] whether or not
@@ -608,7 +613,7 @@ extension TypeExtension on Type {
         JsonKeyNameConverter? classLevelKeyNameConverter =
             reflectionClassMirror.tryGetKeyNameConverter() ?? globalDefaultKeyNameConverter;
 
-        final declarations = reflectionClassMirror.includeParentDeclarations();
+        final declarations = reflectionClassMirror.includeParentDeclarationsIfNecessary();
         for (var declaration in declarations.entries) {
           DeclarationMirror? declarationMirror;
           JsonKeyNameConverter? keyNameConverter = classLevelKeyNameConverter;
@@ -913,7 +918,7 @@ extension ClassMirrorExtension on ClassMirror {
     return null;
   }
 
-  Map<Symbol, DeclarationMirror> includeParentDeclarations() {
+  Map<Symbol, DeclarationMirror> includeParentDeclarationsIfNecessary() {
     Map<Symbol, DeclarationMirror> childDeclarations = declarations;
     ClassMirror? type = superclass;
     if ((includeParentFields() == true || alwaysIncludeParentFields) && !excludeParentFields()) {
