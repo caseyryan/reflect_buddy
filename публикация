@@ -1,5 +1,5 @@
-fvm flutter pub publish --dry-run проверка
-fvm flutter pub publish
+dart pub publish --dry-run проверка
+dart pub publish
 
 dart format . чтобы отформатировать все файлы как надо
  
