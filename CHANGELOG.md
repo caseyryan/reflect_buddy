@@ -1,3 +1,6 @@
+## 1.7.0
+- Add `documentType()` extension method on `Type` which can be used to generate 
+documentation
 ## 1.6.4
 - Fixed an issue with `null` values in maps
 ## 1.6.3

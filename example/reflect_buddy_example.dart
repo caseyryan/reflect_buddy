@@ -1,7 +1,6 @@
 // ignore_for_file: unused_field, unused_element
 
 import 'package:reflect_buddy/reflect_buddy.dart';
-import 'package:reflect_buddy/reflect_buddy.dart';
 
 import 'json_serializable_example/human_json_serializable.dart';
 import 'test_models.dart';
@@ -52,13 +51,19 @@ void main() {
   // _instantiateNonDefaultConstructor();
 
   alwaysIncludeParentFields = true;
-  final user = User()
-    ..id = 10
-    ..firstName = 'Konstantin';
-  final json = user.toJson() as Map;
+  // final user = User()
+  //   ..id = 10
+  //   ..firstName = 'Konstantin';
+  // final json = user.toJson() as Map;
 
-  final extUser = (ExtendedUser).fromJson(json);
-  print(extUser);
+  // final extUser = (ExtendedUser).fromJson({});
+  // print(extUser);
+  // final e = ExtendedUser()
+  // ..lastName = 'Serov';
+  // print(e.toJson(includeNullValues: true));
+
+  final description = (ExtendedUser).documentType();
+  print(description.values.toList());
 }
 
 void _instantiateNonDefaultConstructor() {

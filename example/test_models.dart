@@ -2,11 +2,19 @@ import 'package:reflect_buddy/reflect_buddy.dart';
 
 import 'reflect_buddy_example.dart';
 
-class ExtendedUser extends User {}
+class ExtendedUser extends User {
+  String logo = 'do';
+  Car? car;
 
-@JsonExcludeParentFields()
+  List<Car>? cars;
+  Map<String, Car>? carsMap;
+}
+
+// @JsonExcludeParentFields()
 class User extends BaseModel {
   String? firstName;
+
+  @CamelToSnake()
   String? lastName;
   String? email;
 

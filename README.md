@@ -230,11 +230,11 @@ class User extends BaseModel {
 }
 ```
 
-It is also possible to set blobally by setting global setter `alwaysIncludeParentFields` to `true`
+It is also possible to set globally by setting global setter `alwaysIncludeParentFields` to `true`
 but be careful with this, since this functionality may reveal some sensitive information when it's not needed
 So it's better to use `@JsonIncludeParentFields` on each class where you need it. 
 
-If you still prefer to use it globally but want to hide parent fields for some praticulare class 
+If you still prefer to use it globally but want to hide parent fields for some particular class 
 you can set `alwaysIncludeParentFields` to `true` but on that class use `@JsonExcludeParentFields()`
 
 
@@ -408,7 +408,7 @@ So the hierarchy is like this:
 
 ~~
 It's also possible to set this rule globally 
-by setting the `useCamelToStakeForAll` or `useSnakeToCamelForAll` flags to `true` (they are mutually exclussive)
+by setting the `useCamelToStakeForAll` or `useSnakeToCamelForAll` flags to `true` (they are mutually exclusive)
 in this case all field names will automatically be converted using one of these. 
 But if you have the annotation applied to a field by hand it will have a higher priority
 ~~

@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:mirrors';
 
 // ignore: depend_on_referenced_packages
@@ -12,16 +11,18 @@ import 'package:reflect_buddy/reflect_buddy.dart';
 /// e.g oldKey: userFirstName, newKey: user_first_name
 /// if CamelToSnake() was used
 class ConvertedKey {
-  final String oldKey;
-  final String newKey;
   ConvertedKey({
     required this.oldKey,
     required this.newKey,
+    required this.dartType,
   });
+  final String oldKey;
+  final String newKey;
+  final Object? dartType;
 
   @override
   String toString() {
-    return 'Instance of ConvertedKey [oldKey: $oldKey, newKey: $newKey]';
+    return 'Instance of ConvertedKey [oldKey: $oldKey, newKey: $newKey, dartType: $dartType]';
   }
 }
 
@@ -126,12 +127,19 @@ extension JsonObjectExtension on Object {
   /// to use the native toJson / toMap methods if any
   /// e.g. in case it's a json_serializable model
   /// if any of these methods is present it will be used
+  /// [includeTypeDescription] can be used to include a key type
+  /// represented as string. This might come useful if you
+  /// need to generate a documentation for something
+  /// IMPORTANT: if [includeTypeDescription] is true, no key conversion
+  /// will be applied. The fields will be represented in a way they are present
+  /// in the original model
   Object? toJson({
     bool includeNullValues = false,
     bool tryUseNativeSerializerMethodsIfAny = true,
     JsonKeyNameConverter? keyNameConverter,
     OnKeyConversion? onKeyConversion,
     OnBeforeValueSetting? onBeforeValueSetting,
+    bool includeTypeDescription = false,
   }) {
     keyNameConverter ??= globalDefaultKeyNameConverter;
     if (runtimeType.isPrimitive) {
@@ -148,7 +156,9 @@ extension JsonObjectExtension on Object {
             includeNullValues: includeNullValues,
             keyNameConverter: keyNameConverter,
             onBeforeValueSetting: onBeforeValueSetting,
-            tryUseNativeSerializerMethodsIfAny: tryUseNativeSerializerMethodsIfAny,
+            includeTypeDescription: includeTypeDescription,
+            tryUseNativeSerializerMethodsIfAny:
+                tryUseNativeSerializerMethodsIfAny,
             onKeyConversion: onKeyConversion,
           );
         }
@@ -157,29 +167,33 @@ extension JsonObjectExtension on Object {
     } else if (this is Enum) {
       return (this as Enum).enumToString();
     } else if (this is List) {
-      return (this as List)
-          .map(
-            (e) => (e as Object).toJson(
-              includeNullValues: includeNullValues,
-              keyNameConverter: keyNameConverter,
-              onKeyConversion: onKeyConversion,
-              onBeforeValueSetting: onBeforeValueSetting,
-              tryUseNativeSerializerMethodsIfAny: tryUseNativeSerializerMethodsIfAny,
-            ),
-          )
-          .toList();
+      return (this as List).map(
+        (e) {
+          return (e as Object).toJson(
+            includeNullValues: includeNullValues,
+            keyNameConverter: keyNameConverter,
+            onKeyConversion: onKeyConversion,
+            onBeforeValueSetting: onBeforeValueSetting,
+            includeTypeDescription: includeTypeDescription,
+            tryUseNativeSerializerMethodsIfAny:
+                tryUseNativeSerializerMethodsIfAny,
+          );
+        },
+      ).toList();
     } else if (this is Type) {
       /// this is required to process types as instances
       /// because raw types cannot
       /// be as easily converted to json
       final typeInstance = (this as Type).newTypedInstance();
-      return (typeInstance as Object).toJson(
+      final json = (typeInstance as Object).toJson(
         includeNullValues: includeNullValues,
         keyNameConverter: keyNameConverter,
         onKeyConversion: onKeyConversion,
         onBeforeValueSetting: onBeforeValueSetting,
+        includeTypeDescription: includeTypeDescription,
         tryUseNativeSerializerMethodsIfAny: tryUseNativeSerializerMethodsIfAny,
       );
+      return json;
     }
     final instanceMirror = reflect(this);
 
@@ -202,7 +216,8 @@ extension JsonObjectExtension on Object {
     final declarations = instanceMirror.includeParentDeclarationsIfNecessary();
 
     final Map<String, dynamic> json = {};
-    JsonKeyNameConverter? classLevelKeyNameConverter = instanceMirror.type.tryGetKeyNameConverter();
+    JsonKeyNameConverter? classLevelKeyNameConverter =
+        instanceMirror.type.tryGetKeyNameConverter();
     if (classLevelKeyNameConverter != null && keyNameConverter != null) {
       /// if you pass a keyNameConverter, it will override the existing annotation of the same type
       classLevelKeyNameConverter = null;
@@ -239,18 +254,24 @@ extension JsonObjectExtension on Object {
         if (onKeyConversion != null) {
           oldKey = variableMirror.name;
         }
-
-        final variableName = alternativeName ??
-            variableMirror.tryConvertVariableNameViaAnnotation(
-              variableName: variableMirror.name,
-              keyNameConverter: keyNameConverter,
-            );
+        String variableName;
+        if (includeTypeDescription == true) {
+          /// this is because we need to represent the type as is
+          variableName = variableMirror.name;
+        } else {
+          variableName = alternativeName ??
+              variableMirror.tryConvertVariableNameViaAnnotation(
+                variableName: variableMirror.name,
+                keyNameConverter: keyNameConverter,
+              );
+        }
         if (oldKey != null) {
           newKey = variableName;
           onKeyConversion!(
             ConvertedKey(
               oldKey: oldKey,
               newKey: newKey,
+              dartType: variableMirror.type.reflectedType,
             ),
           );
         }
@@ -263,7 +284,8 @@ extension JsonObjectExtension on Object {
             variableName,
           );
         }
-        final valueConverters = variableMirror.getAnnotationsOfType<JsonValueConverter>();
+        final valueConverters =
+            variableMirror.getAnnotationsOfType<JsonValueConverter>();
         for (final converter in valueConverters) {
           rawValue = converter.convert(
             rawValue,
@@ -282,7 +304,9 @@ extension JsonObjectExtension on Object {
                 keyNameConverter: keyNameConverter,
                 onKeyConversion: onKeyConversion,
                 onBeforeValueSetting: onBeforeValueSetting,
-                tryUseNativeSerializerMethodsIfAny: tryUseNativeSerializerMethodsIfAny,
+                includeTypeDescription: includeTypeDescription,
+                tryUseNativeSerializerMethodsIfAny:
+                    tryUseNativeSerializerMethodsIfAny,
               );
             },
           ).toList();
@@ -299,7 +323,9 @@ extension JsonObjectExtension on Object {
                 keyNameConverter: keyNameConverter,
                 onKeyConversion: onKeyConversion,
                 onBeforeValueSetting: onBeforeValueSetting,
-                tryUseNativeSerializerMethodsIfAny: tryUseNativeSerializerMethodsIfAny,
+                includeTypeDescription: includeTypeDescription,
+                tryUseNativeSerializerMethodsIfAny:
+                    tryUseNativeSerializerMethodsIfAny,
               ),
             ),
           );
@@ -309,10 +335,19 @@ extension JsonObjectExtension on Object {
             keyNameConverter: keyNameConverter,
             onKeyConversion: onKeyConversion,
             onBeforeValueSetting: onBeforeValueSetting,
-            tryUseNativeSerializerMethodsIfAny: tryUseNativeSerializerMethodsIfAny,
+            includeTypeDescription: includeTypeDescription,
+            tryUseNativeSerializerMethodsIfAny:
+                tryUseNativeSerializerMethodsIfAny,
           );
         }
         json[variableName] = value;
+
+        /// allows to include a type represented as a string value
+        if (includeTypeDescription) {
+          final field = instanceMirror.getField(variableMirror.simpleName);
+          print(field);
+          json['${variableName}__TYPE__'] = variableMirror.type.reflectedType;
+        }
       }
     }
     return json;
@@ -322,7 +357,12 @@ extension JsonObjectExtension on Object {
 extension InstanceMirrorExtension on InstanceMirror {
   /// Just adds parent fields if necessary.
   Map<Symbol, DeclarationMirror> includeParentDeclarationsIfNecessary() {
-    return type.includeParentDeclarationsIfNecessary();
+    try {
+      return type.includeParentDeclarations();
+    } catch (e) {
+      print(e);
+    }
+    return {};
   }
 
   Object? tryCallMethod({
@@ -344,6 +384,85 @@ extension InstanceMirrorExtension on InstanceMirror {
 }
 
 extension TypeExtension on Type {
+  /// returns a JSON with all public fields
+  /// of the type and their respective types.
+  /// The field names are included as is, without any conversion
+  Map documentType() {
+    final types = <String, String>{};
+    final json = toJson(
+      includeNullValues: true,
+      includeTypeDescription: true,
+    );
+    if (json is Map) {
+      _describeTypesInMap(
+        json,
+        toString(),
+        types,
+      );
+    }
+    return types;
+  }
+
+  /// [type] a map is required to avoid duplicate classes
+  void _describeTypesInMap(
+    Map json,
+    String typeName,
+    Map types,
+  ) {
+    final buffer = StringBuffer('$typeName \n');
+    for (var kv in json.entries) {
+      final innerType = json['${kv.key}__TYPE__'];
+      bool isLinkedType = false;
+      if (innerType is Type) {
+        if (!innerType.isPrimitive) {
+          if (!innerType.isDateTime &&
+              !innerType.isListType &&
+              !innerType.isMapType) {
+            isLinkedType = true;
+          }
+        }
+      }
+      if (kv.key.contains('__TYPE__')) {
+        /// this is the type conversion.
+        /// Because the value is null, we need to make a JSON from
+        /// the type itself
+        if (kv.value is Type) {
+          final asType = kv.value as Type;
+          isLinkedType = true;
+
+          /// this case means we need to to describe some custom type
+          if (asType.isPrimitive == false) {
+            if (asType.isDateTime) {
+              continue;
+            } else {
+              if (asType.isListType || asType.isMapType) {
+                /// A simple check. We just don't need to display the contents
+                /// of these types even though it will work
+                ///
+                /// Because we don't iterate over the list or map
+                /// Some of the generic types might be lost but this
+                /// is acceptable for now
+                // TODO: process generic types of list and map
+                continue;
+              }
+            }
+            final description = asType.documentType();
+            types.addAll(description);
+          }
+        }
+        continue;
+      }
+      final rawTypeName = innerType.toString();
+
+      /// Wrap type in brackets to be compatible with a markdown link format
+      String typeName =
+          !isLinkedType ? rawTypeName : '[$rawTypeName]($rawTypeName)';
+      buffer.writeln('\t$typeName ${kv.key}: ${kv.value}');
+    }
+    buffer.writeln('}');
+    types[typeName] = buffer.toString();
+  }
+
   Object? newTypedInstance() {
     if (isPrimitive) {
       if (this == String) {
@@ -395,6 +514,16 @@ extension TypeExtension on Type {
     return this == DateTime;
   }
 
+  /// This primitive check should be enough in most cases
+  bool get isListType {
+    // return (reflectType(this) as ClassMirror).isList;
+    return toString().contains('List');
+  }
+
+  bool get isMapType {
+    return toString().contains('Map');
+  }
+
   /// [tryUseNativeSerializerMethodsIfAny] whether or not
   /// to use the native fromJson / fromMap methods if any
   /// e.g. in case it's a json_serializable model
@@ -428,11 +557,13 @@ extension TypeExtension on Type {
 
       final reflectionClassMirror = (reflection as ClassMirror);
 
-      final listInstance = reflectionClassMirror._instantiateUsingDefaultConstructor();
+      final listInstance =
+          reflectionClassMirror._instantiateUsingDefaultConstructor();
       if (listInstance is List) {
         for (var rawValue in data) {
           if (reflectionClassMirror.isGeneric) {
-            final actualType = reflectionClassMirror.typeArguments.first.reflectedType;
+            final actualType =
+                reflectionClassMirror.typeArguments.first.reflectedType;
             final actualValue = actualType.fromJson(
               rawValue,
               useValidators: useValidators,
@@ -449,7 +580,8 @@ extension TypeExtension on Type {
     } else if (data is Map) {
       final reflection = reflectType(this);
       final reflectionClassMirror = (reflection as ClassMirror);
-      final mapInstance = reflectionClassMirror._instantiateUsingDefaultConstructor();
+      final mapInstance =
+          reflectionClassMirror._instantiateUsingDefaultConstructor();
       if (reflectionClassMirror.isMap) {
         for (var kv in data.entries) {
           final rawKeyData = kv.key;
@@ -478,7 +610,8 @@ extension TypeExtension on Type {
           /// a factory constructor with the first positional argument being a map
           const possibleDeserializers = ['fromJson', 'fromMap'];
           for (var possibleDeserializer in possibleDeserializers) {
-            final deserializerReflectee = reflectionClassMirror.tryCallStaticMethodOrFactoryConstructor(
+            final deserializerReflectee =
+                reflectionClassMirror.tryCallStaticMethodOrFactoryConstructor(
               methodName: possibleDeserializer,
               positionalArguments: [
                 data,
@@ -494,9 +627,10 @@ extension TypeExtension on Type {
         /// if the values were previously converted using a SnakeToCamel converter
         /// this will try to convert them back to snake case
         JsonKeyNameConverter? classLevelKeyNameConverter =
-            reflectionClassMirror.tryGetKeyNameConverter() ?? globalDefaultKeyNameConverter;
+            reflectionClassMirror.tryGetKeyNameConverter() ??
+                globalDefaultKeyNameConverter;
 
-        final declarations = reflectionClassMirror.includeParentDeclarationsIfNecessary();
+        final declarations = reflectionClassMirror.includeParentDeclarations();
         for (var declaration in declarations.entries) {
           DeclarationMirror? declarationMirror;
           JsonKeyNameConverter? keyNameConverter = classLevelKeyNameConverter;
@@ -510,9 +644,11 @@ extension TypeExtension on Type {
           String? oldKey;
           String? newKey;
           if (declaration.value is VariableMirror) {
-            final VariableMirror variableMirror = declaration.value as VariableMirror;
+            final VariableMirror variableMirror =
+                declaration.value as VariableMirror;
 
-            final jsonKey = variableMirror.getAnnotationsOfType<JsonKey>().firstOrNull;
+            final jsonKey =
+                variableMirror.getAnnotationsOfType<JsonKey>().firstOrNull;
             if (jsonKey?.name?.isNotEmpty == true) {
               if (onKeyConversion != null) {
                 oldKey = simpleDartFieldName;
@@ -524,12 +660,14 @@ extension TypeExtension on Type {
                   ConvertedKey(
                     oldKey: oldKey,
                     newKey: newKey,
+                    dartType: variableMirror.type.reflectedType,
                   ),
                 );
               }
             } else {
               if (tryApplyReversedKeyConversion) {
-                final variableLevelKeyNameConverter = variableMirror.tryGetKeyNameConverter(
+                final variableLevelKeyNameConverter =
+                    variableMirror.tryGetKeyNameConverter(
                   variableName: simpleDartFieldName,
                 );
                 if (variableLevelKeyNameConverter != null) {
@@ -548,13 +686,15 @@ extension TypeExtension on Type {
                     // }
                     // if (allowConversion) {
 
-                    simpleDartFieldName = keyNameConverter.convert(simpleDartFieldName);
+                    simpleDartFieldName =
+                        keyNameConverter.convert(simpleDartFieldName);
                     if (oldKey != null) {
                       newKey = simpleDartFieldName;
                       onKeyConversion!(
                         ConvertedKey(
                           oldKey: oldKey,
                           newKey: newKey,
+                          dartType: variableMirror.type.reflectedType,
                         ),
                       );
                     }
@@ -571,11 +711,13 @@ extension TypeExtension on Type {
           valueFromJson = data[simpleDartFieldName];
           if (declarationMirror is VariableMirror) {
             final VariableMirror variableMirror = declarationMirror;
-            if (variableMirror.isConst || variableMirror.isJsonIgnored(SerializationDirection.fromJson)) {
+            if (variableMirror.isConst ||
+                variableMirror.isJsonIgnored(SerializationDirection.fromJson)) {
               continue;
             }
             if (variableMirror.isPrivate) {
-              if (!variableMirror.isJsonIncluded(SerializationDirection.fromJson)) {
+              if (!variableMirror
+                  .isJsonIncluded(SerializationDirection.fromJson)) {
                 continue;
               }
             }
@@ -586,7 +728,8 @@ extension TypeExtension on Type {
                   : variableClassMirror.runtimeType;
               final isEnum = variableClassMirror.isEnum;
 
-              final valueConverters = variableMirror.getAnnotationsOfType<JsonValueConverter>();
+              final valueConverters =
+                  variableMirror.getAnnotationsOfType<JsonValueConverter>();
               var value = valueFromJson;
 
               for (final converter in valueConverters) {
@@ -604,7 +747,8 @@ extension TypeExtension on Type {
                 useValidators: useValidators,
               );
               if (useValidators) {
-                final valueValidators = variableMirror.getAnnotationsOfType<JsonValueValidator>();
+                final valueValidators =
+                    variableMirror.getAnnotationsOfType<JsonValueValidator>();
                 final variableName = variableMirror.simpleName.toName();
                 for (final validator in valueValidators) {
                   validator.validate(
@@ -616,7 +760,10 @@ extension TypeExtension on Type {
               try {
                 instanceMirror.setField(
                   variableMirror.simpleName,
-                  value ?? instanceMirror.getField(variableMirror.simpleName).reflectee,
+                  value ??
+                      instanceMirror
+                          .getField(variableMirror.simpleName)
+                          .reflectee,
                 );
               } catch (_) {
                 /// this exception is suppressed to avoid setting
@@ -634,7 +781,10 @@ extension TypeExtension on Type {
               try {
                 instanceMirror.setField(
                   variableMirror.simpleName,
-                  valueFromJson ?? instanceMirror.getField(variableMirror.simpleName).reflectee,
+                  valueFromJson ??
+                      instanceMirror
+                          .getField(variableMirror.simpleName)
+                          .reflectee,
                 );
               } catch (_) {
                 /// this exception is suppressed to avoid setting
@@ -728,7 +878,9 @@ extension VariableMirrorExtension on VariableMirror {
   }
 
   String? get alternativeName {
-    return getAnnotationsOfType<JsonKey>().firstWhereOrNull((e) => e.name != null)?.name;
+    return getAnnotationsOfType<JsonKey>()
+        .firstWhereOrNull((e) => e.name != null)
+        ?.name;
   }
 }
 
@@ -778,7 +930,8 @@ extension ClassMirrorExtension on ClassMirror {
     List<Object?> positionalArguments = const [],
     Map<Symbol, Object?> namedArguments = const {},
   }) {
-    final factoryConstructorSymbol = Symbol('${reflectedType.toString()}.$methodName');
+    final factoryConstructorSymbol =
+        Symbol('${reflectedType.toString()}.$methodName');
     final methodSymbol = Symbol(methodName);
     if (declarations.containsKey(methodSymbol)) {
       return invoke(
@@ -788,7 +941,8 @@ extension ClassMirrorExtension on ClassMirror {
       ).reflectee;
     } else if (declarations.containsKey(factoryConstructorSymbol)) {
       final possibleFactoryConstructor = declarations[factoryConstructorSymbol];
-      if (possibleFactoryConstructor is MethodMirror && possibleFactoryConstructor.isFactoryConstructor) {
+      if (possibleFactoryConstructor is MethodMirror &&
+          possibleFactoryConstructor.isFactoryConstructor) {
         return newInstance(
           methodSymbol,
           positionalArguments,
@@ -799,10 +953,11 @@ extension ClassMirrorExtension on ClassMirror {
     return null;
   }
 
-  Map<Symbol, DeclarationMirror> includeParentDeclarationsIfNecessary() {
+  Map<Symbol, DeclarationMirror> includeParentDeclarations() {
     Map<Symbol, DeclarationMirror> childDeclarations = declarations;
     ClassMirror? type = superclass;
-    if ((includeParentFields() == true || alwaysIncludeParentFields) && !excludeParentFields()) {
+    if ((includeParentFields() == true || alwaysIncludeParentFields) &&
+        !excludeParentFields()) {
       final tempDeclarations = {...childDeclarations};
       while (type != null) {
         final declarations = type.declarations.entries.where(
@@ -814,7 +969,8 @@ extension ClassMirrorExtension on ClassMirror {
         if (type == null || needsToExcludeParent) {
           break;
         }
-        final needsToIncludeParent = (type.includeParentFields() == true || alwaysIncludeParentFields);
+        final needsToIncludeParent =
+            (type.includeParentFields() == true || alwaysIncludeParentFields);
         if (!needsToIncludeParent) {
           type = null;
         }
@@ -881,7 +1037,10 @@ extension ClassMirrorExtension on ClassMirror {
     Symbol constructorName,
   ) {
     return declarations.values.firstWhereOrNull(
-      (e) => e is MethodMirror && e.isConstructor && e.constructorName == constructorName,
+      (e) =>
+          e is MethodMirror &&
+          e.isConstructor &&
+          e.constructorName == constructorName,
     ) as MethodMirror?;
   }
 
@@ -922,7 +1081,8 @@ extension ClassMirrorExtension on ClassMirror {
   }
 
   bool get isList {
-    return qualifiedName == const Symbol('dart.core.List') || qualifiedName == const Symbol('dart.core.GrowableList');
+    return qualifiedName == const Symbol('dart.core.List') ||
+        qualifiedName == const Symbol('dart.core.GrowableList');
   }
 
   bool get isMap {
