@@ -22,16 +22,6 @@
 - [Writing custom annotations](#writing-custom-annotations)
 
 
----
-If you want to support my development you can donate some `ETH / USDT`
-**0xaDed99fda2AA53B3aFC8bB2d27b14910dB9CEdA1**
-
-<img src="https://github.com/caseyryan/reflect_buddy/blob/master/trust.jpg?raw=true" width="220"/>
-
-[Donate via Trust Wallet](https://link.trustwallet.com/send?address=0xaDed99fda2AA53B3aFC8bB2d27b14910dB9CEdA1&asset=c60)
-
----
-
 ## Small Intro
 
 Having been involved in a C# development in the past, I always liked its ability to serialize and deserialize ordinary objects without any problems. There is no need to prepare any models, and field management can be done using attributes. To write an easy-to-use backend solution, I really missed such a functionality in Dart. So I decided to develop it myself. Meet **Reflect Buddy**:

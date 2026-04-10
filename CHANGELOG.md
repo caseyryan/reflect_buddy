@@ -1,3 +1,5 @@
+## 1.7.3
+- Updates to readme
 ## 1.7.2
 - More accurate documentation generation for dart types
 ## 1.7.1
